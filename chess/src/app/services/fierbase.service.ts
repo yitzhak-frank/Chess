@@ -38,6 +38,10 @@ export class FierbaseService {
     return this.gamesRef.doc(id).valueChanges({ idField: 'id' });
   }
 
+  getGameInfoByGameId(gameId: string) {
+    return this.afs.collection('games_info', ref => ref.where('game_id', '==', gameId))
+  }
+
   removeGame(id: string) {
     return this.gamesRef.doc(id).delete();
   }

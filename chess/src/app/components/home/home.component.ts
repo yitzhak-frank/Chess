@@ -40,7 +40,7 @@ export class HomeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   createGameLink(): void {
-    this.link = `http://localhost:4200/home/${this.GameService.getGmaeId()}`;
+    this.link = `http://localhost:4200/home/${this.GameService.getGameId()}`;
   }
 
   copyLink(input: HTMLInputElement): void {
