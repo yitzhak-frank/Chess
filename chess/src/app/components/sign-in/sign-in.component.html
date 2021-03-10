@@ -1,0 +1,9 @@
+<div class="login">
+  <h1>Sign {{user ? 'Out' : 'In'}}</h1>
+  <span *ngIf="!user; else signout">
+    <button (click)="login()">Sign in with google</button>
+  </span>
+</div>
+<ng-template #signout>
+  <button (click)="logout()">Sign out</button>
+</ng-template>

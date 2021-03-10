@@ -1,0 +1,48 @@
+table {
+  box-shadow: 0 0 16px black;
+  border: 25px solid rgb(82, 82, 82);
+  border-collapse: collapse;
+  margin: 0 auto;
+  transform: rotate(180deg);
+  box-sizing: border-box;
+
+  td {
+    text-align: center;
+    font-size: 2.5rem;
+
+    div {
+      height: 60px;
+      width: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .selected {
+      color: rgb(131, 175, 43);
+    }
+  }
+
+  .isChess {
+    color: red;
+  }
+
+  .canGo {
+    height: 60px;
+    width: 60px;
+    background-color: rgba(111, 187, 109, 0.25);
+  }
+}
+
+.test {
+  background-color: rgba(114, 71, 46, 0.25);
+}
+
+tr:nth-child(even) td:nth-child(even), tr:nth-child(odd) td:nth-child(odd) {
+  background: rgba(128, 128, 128, 0.95);
+}
+
+tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.95);
+}
+

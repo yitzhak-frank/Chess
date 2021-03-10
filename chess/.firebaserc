@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "chessmate-22c5c": {
+      "hosting": {
+        "chess": [
+          "chessmate-22c5c"
+        ]
+      }
+    }
+  }
+}

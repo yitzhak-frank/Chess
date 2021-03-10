@@ -1,0 +1,8 @@
+<div class="container">
+  <div class="options">
+    <div class="option" *ngFor="let option of options; index as i"
+      (click)="selectTool(color ? whiteTools[i]: blackTools[i], option)">
+      {{color ? whiteTools[i]: blackTools[i]}}
+    </div>
+  </div>
+</div>

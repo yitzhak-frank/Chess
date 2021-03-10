@@ -1,0 +1,34 @@
+<div class="home-body" (click)="showLogin()">
+  <div class="home-body-cover">
+    <div class="top">
+      <span class="heading">
+        <h1 class="heading-1">Welcome To Chess</h1>
+        <h4 class="heading-2">Click anywhere to start</h4>
+      </span>
+      <span class="sign-in" id="sign-in" *ngIf="showLoginIndex">
+        <app-sign-in (onLogin)="getUser($event)"></app-sign-in>
+      </span>
+    </div>
+    <div class="main" *ngIf="user && showLoginIndex">
+      <div class="start-game" id="start-game">
+        <h1>Start Play</h1>
+        <p>Hello {{userName}} :)</p>
+        <p>
+          To start a new game click the "Get New Game Link" button, then
+          copy the link below, send it to your game partner and start playing
+        </p>
+
+        <button>Go To Games List</button>
+        <button *ngIf="!link; else gameLink" (click)="createGameLink()">Get New Game Link</button>
+
+        <ng-template #gameLink>
+          <input type="text" #input [value]="link">
+          <strong (click)="copyLink(input)">Copy</strong>
+        </ng-template>
+
+        <div class="copied-tooltip" *ngIf="copyTooltip">Copied to clipboard!</div>
+        <div class="copy-tooltip" *ngIf="!copyTooltip">Copy link</div>
+      </div>
+    </div>
+  </div>
+</div>
