@@ -2,7 +2,7 @@ import firebase from 'firebase/app';
 import { AuthService } from 'src/app/services/auth.service';
 import { Component, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { GameService } from 'src/app/services/game.service';
+import { GameCreatorService } from 'src/app/services/game-creator.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -10,7 +10,7 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit, OnDestroy, OnChanges {
+export class HomeComponent implements OnInit, OnChanges, OnDestroy {
 
   userName: string  = '';
   link:     string  = '';
@@ -20,17 +20,20 @@ export class HomeComponent implements OnInit, OnDestroy, OnChanges {
   copyTooltip:    boolean = false;
   private subscription: Subscription[] = [];
 
-  constructor(public AuthService: AuthService, public GameService: GameService, public activatedRoute: ActivatedRoute) {}
+  constructor(
+    public AuthService: AuthService,
+    public GameCreatorService: GameCreatorService,
+    public Route: ActivatedRoute
+  ) {}
 
   showLogin() {
     if(this.params) return this.AuthService.googleLogin();
-    if(this.user) this.GameService.connectToGame();
     this.showLoginIndex = true;
-    let elementsToShow = this.user ? ['sign-in', 'start-game'] : ['sign-in'];
+    let elementsToShow  = this.user ? ['sign-in', 'start-game'] : ['sign-in'];
     this.setElementTransform(elementsToShow);
   }
 
-  getUser(user): void {
+  getUser(user: firebase.User): void {
     this.user = user;
     if(user) this.setElementTransform(['start-game']);
   }
@@ -40,7 +43,7 @@ export class HomeComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   createGameLink(): void {
-    this.link = `http://localhost:4200/home/${this.GameService.getGameId()}`;
+    this.link = `http://localhost:4200/home?gameId=${this.GameCreatorService.getGameId()}&playerColor=0`;
   }
 
   copyLink(input: HTMLInputElement): void {
@@ -52,19 +55,20 @@ export class HomeComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     this.subscription.push(
-      this.activatedRoute.params.subscribe(params => {
-        if(!params.gameId) this.GameService.playerColor = true;
+      this.Route.queryParams.subscribe(params => {
+        if(!params.gameId) this.GameCreatorService.setPlayerColor(true);
         else {
           this.params = params.gameId
-          this.GameService.gameId = params.gameId;
-          this.GameService.saveGameId(params.gameId);
-          this.GameService.playerColor = false;
+          this.GameCreatorService.setGameId(params.gameId);
+          this.GameCreatorService.saveGameId(params.gameId);
+          this.GameCreatorService.setPlayerColor(false);
         }
       }),
       this.AuthService.user$.subscribe(user => {
         this.user = user;
-        this.userName = user?.providerData[0].displayName;
-        if(this.user) this.GameService.connectToGame();
+        this.userName = user?.displayName;
+        if(!this.params) this.GameCreatorService.setPlayerColor(true);
+        if(user) this.GameCreatorService.connectToGame();
       })
     );
   }

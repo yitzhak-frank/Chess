@@ -1,0 +1,26 @@
+.player {
+  margin: 10px;
+  padding: 25px;
+  box-shadow: 2px 2px 8px gray;
+  border-radius: 10px;
+
+  .user-details {
+    text-align: center;
+
+    img {
+      margin-top: -70px;
+      height: 70px;
+      width: 70px;
+      border-radius: 50%;
+      border: 3px solid white;
+    }
+  }
+}
+.player.white {
+  color: black;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+.player.black {
+  color: white;
+  background-color: rgba(0,0,0,0.7);
+}

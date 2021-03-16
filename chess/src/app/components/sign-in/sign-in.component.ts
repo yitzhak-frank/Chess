@@ -1,7 +1,8 @@
 import firebase from 'firebase/app';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { GameCreatorService } from 'src/app/services/game-creator.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -14,7 +15,7 @@ export class SignInComponent implements OnInit, OnDestroy {
   subscripion: Subscription;
   @Output() onLogin = new EventEmitter<firebase.User>();
 
-  constructor(public AuthService: AuthService) {
+  constructor(private AuthService: AuthService, private GameCreatorService: GameCreatorService) {
     this.subscripion = this.AuthService.user$.subscribe(user => {
       this.user = user;
       this.onLogin.emit(this.user);
@@ -27,6 +28,7 @@ export class SignInComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.AuthService.logOut();
+    this.GameCreatorService.removeGameId();
   }
 
   ngOnInit(): void {}

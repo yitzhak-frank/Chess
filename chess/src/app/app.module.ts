@@ -15,6 +15,8 @@ import { ChessTableComponent } from './components/chess-table/chess-table.compon
 import { CoronationComponent } from './components/coronation/coronation.component';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { GamesListComponent } from './components/games-list/games-list.component';
+import { TimeCounterComponent } from './components/time-counter/time-counter.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +29,8 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
     ChessGameComponent,
     ChessTableComponent,
     CoronationComponent,
+    GamesListComponent,
+    TimeCounterComponent,
   ],
   imports: [
     BrowserModule,

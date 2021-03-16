@@ -24,6 +24,7 @@ export class CoronationComponent implements OnInit {
     let selectedTool: ToolInfo = { position, tool, color, rank };
     this.tableService.coronation(selectedTool);
     this.coronation.emit(null);
+    this.tableService.updateGameInfo();
   }
 
   ngOnInit(): void {}

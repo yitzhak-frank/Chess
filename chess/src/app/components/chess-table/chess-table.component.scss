@@ -3,7 +3,6 @@ table {
   border: 25px solid rgb(82, 82, 82);
   border-collapse: collapse;
   margin: 0 auto;
-  transform: rotate(180deg);
   box-sizing: border-box;
 
   td {
@@ -46,3 +45,6 @@ tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
   background: rgba(255, 255, 255, 0.95);
 }
 
+table.white {
+  transform: rotate(180deg);
+}

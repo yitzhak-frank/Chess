@@ -10,6 +10,6 @@ export class GameInfoComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-  }
 
+  }
 }

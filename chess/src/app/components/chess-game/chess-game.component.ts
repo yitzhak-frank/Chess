@@ -1,8 +1,10 @@
+import firebase from 'firebase/app';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AuthService } from 'src/app/services/auth.service';
 import { GameService } from 'src/app/services/game.service';
+import { FierbaseService } from 'src/app/services/firebase.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-chess-game',
@@ -11,22 +13,35 @@ import { GameService } from 'src/app/services/game.service';
 })
 export class ChessGameComponent implements OnInit, OnDestroy {
 
-  public  userName;
-  public  user;
+  public  playerColor:   boolean = false;
+  public  blackUser:     firebase.User;
+  public  whiteUser:     firebase.User;
   private subscriptions: Subscription[] = [];
 
-  constructor(private ActivatedRoute: ActivatedRoute, private AuthService: AuthService, private GameService: GameService) { }
+  constructor(
+    private Route:       ActivatedRoute,
+    private fbs:         FierbaseService,
+    private GameService: GameService,
+    private Router:      Router,
+  ) {}
 
   ngOnInit(): void {
-    this.subscriptions.push(
-      this.ActivatedRoute.params.subscribe(params => {
-        this.GameService.openGameSocket(params.gameId)
-      }),
-      this.AuthService.user$.subscribe(user => {
-        this.user = user;
-        this.userName = user?.providerData[0].displayName;
-      })
-    );
+    let subscription = this.Route.queryParams.subscribe(params => {
+
+      if(!params.gameId) return this.Router.navigate(['/home']);
+
+      this.GameService.openGameSocket(params.gameId);
+      this.GameService.openGameConnection(params.gameId)
+
+      this.playerColor = Boolean(Number(params.playerColor));
+
+      this.fbs.getGameById(params.gameId).pipe(take(1)).subscribe(({white_user, black_user}) => {
+        this.blackUser = JSON.parse(black_user);
+        this.whiteUser = JSON.parse(white_user);
+        console.log(JSON.parse(black_user), JSON.parse(white_user))
+      });
+    });
+    this.subscriptions.push(subscription);
   }
 
   ngOnDestroy(): void {

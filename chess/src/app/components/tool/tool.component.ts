@@ -3,12 +3,18 @@ import { ToolInfo } from 'src/app/interfaces/tool-interface';
 
 @Component({
   selector: 'app-tool',
-  template: `<div  class="tool" (click)="moveTool()">{{toolInfo.tool || ''}}</div>`,
-  styles: [`div {cursor: default; transform: rotate(180deg);} div:hover {transform: scale(1.05) rotate(180deg)}`]
+  template: `<div  [ngClass]="{tool: true, white: playerColor}" (click)="moveTool()">{{toolInfo.tool || ''}}</div>`,
+  styles: [`
+    div {cursor: default;}
+    div:hover {transform: scale(1.05)}
+    .white {transform: rotate(180deg);}
+    .white:hover {transform: scale(1.05) rotate(180deg)}
+  `]
 })
 export class ToolComponent implements OnInit {
 
-  @Input() toolInfo: ToolInfo;
+  @Input() toolInfo:    ToolInfo;
+  @Input() playerColor: boolean;
   @Output() cellClicked = new EventEmitter<ToolInfo>();
 
   constructor() {}

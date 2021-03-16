@@ -1,1 +1,7 @@
-<p>player works!</p>
+<div class="player" [ngClass]="{white: color, black: !color}">
+  <div class="user-details">
+    <img class="user-img" [src]="user?.photoURL" alt="user">
+    <h6>{{user?.displayName}}</h6>
+  </div>
+  <app-time-counter [startTime]="0" [color]="color"></app-time-counter>
+</div>

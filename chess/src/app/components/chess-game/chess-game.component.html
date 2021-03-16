@@ -1,3 +1,7 @@
-<div class="container-fluid">
-  <app-chess-table></app-chess-table>
+<div class="container-fluid d-flex align-items-center">
+  <div class="wrapper w-100 d-flex justify-content-between">
+    <app-player [user]="blackUser" [color]="false"></app-player>
+    <app-chess-table [playerColor]="playerColor"></app-chess-table>
+    <app-player [user]="whiteUser" [color]="true"></app-player>
+  </div>
 </div>

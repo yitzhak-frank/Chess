@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { cols, rows } from 'src/app/data/tableArrays';
 import { firstPosition } from 'src/app/data/toolsPosition';
 import { ToolInfo } from 'src/app/interfaces/tool-interface';
@@ -15,13 +15,14 @@ export class ChessTableComponent implements OnInit {
   public cols:           string[] = cols;
   public toolsPosition:  object   = firstPosition;
   public possibleMoves:  string[] = [];
-  public thretsMap:      string[] = [];
+  public isChess:        object;
   public colorTurn:      boolean;
   public coronationInfo: any;
+  @Input() playerColor:  boolean;
 
   constructor(private tableService: ChessTableService) {
     this.possibleMoves  = tableService.possibleMoves;
-    this.thretsMap      = tableService.thretsMap;
+    this.isChess        = tableService.isChess;
     this.colorTurn      = tableService.colorTurn;
   }
 
@@ -42,6 +43,6 @@ export class ChessTableComponent implements OnInit {
 
   public coronation(e): void { this.coronationInfo = e }
 
-  ngOnInit(): void { this.tableService.onTableLoad() }
+  ngOnInit(): void { this.tableService.onTableLoad(this.playerColor) }
 
 }

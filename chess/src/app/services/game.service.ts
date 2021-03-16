@@ -1,100 +1,101 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { shareReplay, switchMap } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-import { shareReplay, take } from 'rxjs/operators';
-import { firstPosition } from '../data/toolsPosition';
+import { FierbaseService } from './firebase.service';
+import { GameCreatorService } from 'src/app/services/game-creator.service';
+import { Injectable, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
 import { AuthService } from './auth.service';
-import { FierbaseService } from './fierbase.service';
+import { Router } from '@angular/router';
+import { firstPosition } from '../data/toolsPosition';
 
 @Injectable({
   providedIn: 'root'
 })
-export class GameService implements OnDestroy {
+export class GameService implements OnInit, OnDestroy {
 
-  public  gameId: string = '';
-  public  playerColor: boolean;
+  private userId:      string
+  private playerColor: string;
+  private connector;
+  private toolsPosition = firstPosition;
   private subscriptions: Subscription[] = [];
+  @Output() player2 = new EventEmitter();
 
-  constructor(public fbs: FierbaseService, public AuthService: AuthService) {}
+  constructor(
+    private fbs:         FierbaseService,
+    private GameCreator: GameCreatorService,
+    private AuthService: AuthService,
+    private Route:       Router,
+  ) {}
 
-  connectToGame(): void {
-    let uid = this.AuthService.user.uid
-    if(this.playerColor && !this.getGameId()) this.createGame(uid);
-    else if(!this.playerColor) this.addPlayerToGame(uid);
-  }
-
-  createGame(uid: string): void {
-    this.subscriptions.push(this.fbs.gatUserGames(uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
-      if(!games.length) this.addGame(uid);
-      else {
-        let emptyGame = games[games.findIndex(game => !game['black_uid'])]
-        if(emptyGame) this.gameId = emptyGame.id;
-        else if(!this.gameId) this.addGame(uid);
-      }
-    }));
-  }
-
-  addGame(uid: string): void {
-    this.fbs.addGame({white_uid: uid, black_uid: ''}).then(docRef => {
-      this.saveGameId(docRef.id);
-      this.gameId = docRef.id;
-      this.listenToPlayerJoin();
-    });
-  }
-
-  addPlayerToGame(uid: string): void {
-    this.subscriptions.push(
-      this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(game => {
-        if(!game.black_uid) this.fbs.updateGame({black_uid: uid}, this.gameId);
-        this.saveGameId(this.gameId);
-      })
-    );
-  }
-
-  listenToPlayerJoin() {
-    this.subscriptions.push(
-      this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(game => {
-        if(game['black_uid']) this.createGameInfo();
-      })
-    )
-  }
-
-  saveGameId(gameId: string): void {
-    localStorage['chss-game-id'] = gameId;
-  }
-
-  getGameId(): string | void {
-    return localStorage['chss-game-id'];
-  }
-
-  createGameInfo(): void {
-    let gameInfo = {
-      game_id:    this.gameId,
-      start_date: new Date().getTime(),
-      last_date:  new Date().getTime(),
-      color_turn: true,
-      moves:      0,
-      game_time:  '00:00',
-      black_time: '00:00',
-      white_time: '00:00',
-      black_attacks: 0,
-      white_attacks: 0,
-      black_dead_tools: '',
-      white_dead_tools: '',
-      tools_position: JSON.stringify(firstPosition),
-    }
-    this.fbs.addGameInfo(gameInfo)
-  }
+  getGameId = () => localStorage['chess-game-id'];
 
   openGameSocket(gameId: string): void {
-    this.subscriptions.push(
-      this.fbs.getGameInfoByGameId(gameId).valueChanges().pipe(shareReplay(1)).subscribe(gameInfo => {
-        console.log(gameInfo)
-      })
-    );
+    let subscription = this.fbs.getGameInfoByGameId(gameId).valueChanges().pipe(shareReplay(1)).subscribe(([gameInfo]) => {
+      if(!gameInfo) return;
+      this.player2.emit(gameInfo);
+    });
+    this.subscriptions.push(subscription);
   }
+
+  openGameConnection(gameId: string): void {
+    let subscription = this.AuthService.getUserId().pipe(
+      switchMap((...[{uid}]) => {
+        if(!uid) return;
+        this.userId = uid;
+        return this.fbs.getGameById(this.getGameId());
+      }),
+      switchMap((...[game]) => {
+        if(!game) return;
+        this.playerColor = game['black_uid'] === this.userId ? 'black_player' : 'white_player';
+        this.sendConnection();
+        return this.fbs.getGameConnectionByGameId(gameId).valueChanges().pipe(shareReplay(1));
+      })
+    ).subscribe(([connection]) => {
+      if(!connection) return;
+      let player2 = this.playerColor.includes('white') ? 'black_player' : 'white_player';
+      // if(
+      //   connection[this.playerColor] - connection[player2] > (1000 * 90) ||
+      //   connection[this.playerColor] - connection[player2] < (-1000 * 90)
+      // ) this.connectionFail();
+      console.log(this.playerColor,connection[this.playerColor] ,player2, connection[player2]);
+      console.log(
+        connection[this.playerColor] - connection[player2],
+        connection[this.playerColor] - connection[player2] > (1000 * 99),
+        connection[this.playerColor] - connection[player2] < (-1000 * 99)
+      );
+    })
+    this.subscriptions.push(subscription);
+  }
+
+  sendConnection(): void {
+    let gameId = this.GameCreator.getGameId();
+    let connectionUpdate = {[this.playerColor]: new Date().getTime()};
+    this.connector = setInterval(() => {
+      //this.fbs.updateGameConnectionByGameId(connectionUpdate, gameId);
+    }, 1000 * 30);
+  }
+
+  connectionFail(): void {
+    console.log('connection fail');
+    clearInterval(this.connector);
+    this.Route.navigate(['/home']);
+  }
+
+  updateGameInfo(color_turn: boolean, threts_map: string[], moves: number): void {
+    let updatedInfo = {
+      color_turn,
+      threts_map,
+      moves,
+      tools_position: this.toolsPosition,
+      last_date: new Date().getTime(),
+      game_time: '00:00:00'
+    }
+    this.fbs.updateGameInfoByGameId(updatedInfo, this.getGameId());
+  }
+
+  ngOnInit() {}
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    clearInterval(this.connector);
   }
-
 }

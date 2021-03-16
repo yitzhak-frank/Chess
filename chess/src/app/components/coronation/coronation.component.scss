@@ -1,18 +1,15 @@
 .container {
   position: fixed;
-  top: 0;
+  top: 0; left: 0; bottom: 0; right: 0;
   z-index: 3;
-  height: 100%;
   width: 100%;
-  margin-left: -8px;
+  height: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
   background-color: rgba(0,0,0,0.5);
 
   .options {
-    position: fixed;
-    top: calc(50% - (3rem + 28px));
-    margin-left: -35px;
     width: 515px;
     display: flex;
     justify-content: center;
@@ -24,10 +21,11 @@
 
     .option {
       cursor: pointer;
-      padding-top: 10px;
-      padding-bottom: 10px;
-      padding-right: 25px;
-      padding-left: 25px;
+      height: 100px;
+      width: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin: 20px;
       border-radius: 20px;
       background-color: #bbb;

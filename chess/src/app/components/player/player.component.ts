@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import firebase from 'firebase/app';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-player',
@@ -7,7 +8,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PlayerComponent implements OnInit {
 
-  constructor() { }
+  @Input() user: firebase.User;
+  @Input() color: boolean;
+
+  constructor() {}
 
   ngOnInit(): void {
   }

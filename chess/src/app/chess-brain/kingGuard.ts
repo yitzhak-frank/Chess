@@ -53,7 +53,7 @@ class KingGuard {
       // if there is another tool in this position save it
       (newPosition)? originalTool = JSON.parse(JSON.stringify(newPosition)): originalTool = null;
       toolsPosition[possibleMoves[move]] = defender;
-      if(attacker.getThretsMap().includes(kingPos)) moves.splice(moves.indexOf(possibleMoves[move]) , 1);
+      if(attacker.getThretsMap().includes(kingPos)) moves.splice(moves.indexOf(possibleMoves[move]), 1);
       (originalTool)? toolsPosition[possibleMoves[move]] = originalTool: delete toolsPosition[possibleMoves[move]];
     }
     possibleMoves.splice(0, possibleMoves.length);
