@@ -2,8 +2,8 @@ import 'firebase/auth'
 import firebase from 'firebase/app';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { UserStatusService } from './user-status.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +14,13 @@ export class AuthService {
   user: firebase.User = null;
   isLogged: boolean = false;
 
-  constructor(private afa: AngularFireAuth) {
+  constructor(private afa: AngularFireAuth, private UserStatus: UserStatusService) {
     this.user$ = this.getUserId();
     this.user$.subscribe(user => this.user = user);
   }
 
   getUserId() {
-    return this.afa.authState.pipe(shareReplay(1));
+    return this.afa.authState;
   }
 
   signup(email: string, password: string) {
@@ -36,6 +36,7 @@ export class AuthService {
   }
 
   logOut() {
+    this.UserStatus.updateUserStatus(this.user.uid, 'offline');
     return this.afa.signOut();
   }
 }

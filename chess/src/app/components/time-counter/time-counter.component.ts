@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { ChessTableService } from 'src/app/services/chess-table.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { ChessTableService } from 'src/app/services/chess-table.service';
   templateUrl: './time-counter.component.html',
   styleUrls: ['./time-counter.component.scss']
 })
-export class TimeCounterComponent implements OnInit, OnDestroy {
+export class TimeCounterComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() startTime: number;
   @Input() color:     boolean;
@@ -28,6 +28,10 @@ export class TimeCounterComponent implements OnInit, OnDestroy {
       this.startTime += 1
       this.setTimeCount();
     }, 1000);
+  }
+
+  ngOnChanges(): void {
+    this.setTimeCount();
   }
 
   ngOnDestroy(): void {

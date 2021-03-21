@@ -11,6 +11,7 @@ class Queen extends Tool {
     this.setIndex();
     this.thretsMap = [];
     this.possibleMoves = [];
+
     for(let i = 1; (i + this.index[0] < 8) && (i + this.index[1] < 8); i++)
       if(check(this.chessMatrix[this.index[0] + i][this.index[1] + i])) break;
     for(let i = 1; (this.index[0] - i >= 0) && (this.index[1] - i >= 0); i++)

@@ -4,6 +4,7 @@ import { Component, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { GameCreatorService } from 'src/app/services/game-creator.service';
 import { ActivatedRoute } from '@angular/router';
+import { UserStatusService } from 'src/app/services/user-status.service';
 
 @Component({
   selector: 'app-home',
@@ -21,9 +22,10 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
   private subscription: Subscription[] = [];
 
   constructor(
-    public AuthService: AuthService,
-    public GameCreatorService: GameCreatorService,
-    public Route: ActivatedRoute
+    public  AuthService: AuthService,
+    public  GameCreatorService: GameCreatorService,
+    public  Route: ActivatedRoute,
+    private UserStatus: UserStatusService
   ) {}
 
   showLogin() {
@@ -43,7 +45,7 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   createGameLink(): void {
-    this.link = `http://localhost:4200/home?gameId=${this.GameCreatorService.getGameId()}&playerColor=0`;
+    this.link = `http://localhost:4200/home?gameId=${this.GameCreatorService.getGameId()}`;
   }
 
   copyLink(input: HTMLInputElement): void {

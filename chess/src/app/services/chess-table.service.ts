@@ -3,11 +3,11 @@ import { firstPosition } from '../data/toolsPosition';
 import { Subscription } from 'rxjs';
 import { GameService } from './game.service';
 import { chessMatrix } from '../data/tableArrays';
+import { GameInfo } from '../interfaces/game-interfaces';
 import { ToolInfo } from '../interfaces/tool-interface';
 import ToolsFactory from '../chess-brain/toolsFactory';
 import KingGuard from '../chess-brain/kingGuard';
 import Castling from '../chess-brain/castling';
-import { GameInfo } from '../interfaces/game-interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class ChessTableService implements OnInit, OnDestroy {
   private chessMatrix:      Array<Array<string>> = chessMatrix;
   private toolsPosition:    object   = firstPosition;
   private toolsClasses:     object   = {};
-  private playerColor:      boolean;
+  private playerColor:      boolean[];
   public  colorTurn:        boolean  = true;
   private selectedTool:     ToolInfo;
   public  possibleMoves:    string[] = [];
@@ -27,8 +27,9 @@ export class ChessTableService implements OnInit, OnDestroy {
   public  coronationInfo:   object;
   private subscriptions:    Subscription[] = [];
   public  isChess:          object = {position: '', color: false};
-  private moves:            number = 0;
   public  gameInfo:         GameInfo;
+  private deadTool:         ToolInfo;
+  public  gameStatus:       string;
 
   constructor(private GameService: GameService) {
     this.getGameData();
@@ -37,15 +38,14 @@ export class ChessTableService implements OnInit, OnDestroy {
   getGameData() {
     let {toolsPosition, toolsClasses, GameService, subscriptions, thretsMap, isChess} = this;
     let subscription = GameService.player2.subscribe((gameInfo) => {
-      let {tools_position, threts_map, color_turn, moves} = gameInfo;
+      let {tools_position, threts_map, color_turn} = gameInfo;
 
-      for(let tool in toolsPosition) delete toolsPosition[tool];
-      for(let tool in toolsClasses) if(!toolsPosition[tool]) delete toolsClasses[tool];
+      for(let tool in toolsPosition)  delete toolsPosition[tool];
+      for(let tool in toolsClasses)   if(!toolsPosition[tool]) delete toolsClasses[tool];
       for(let tool in tools_position) toolsPosition[tool] = tools_position[tool];
-      for(let tool in toolsPosition) if(!toolsClasses[tool]) toolsClasses[tool] = new ToolsFactory(toolsPosition[tool]).class;
+      for(let tool in toolsPosition)  if(!toolsClasses[tool]) toolsClasses[tool] = new ToolsFactory(toolsPosition[tool]).class;
 
       this.colorTurn = color_turn;
-      this.moves     = moves;
 
       thretsMap.splice(0, thretsMap.length);
       thretsMap.push(...threts_map);
@@ -55,11 +55,14 @@ export class ChessTableService implements OnInit, OnDestroy {
 
       KingGuard.checkGameState(thretsMap, toolsClasses, this.colorTurn, toolsPosition);
       this.gameInfo = gameInfo;
+
+      this.GameService.setTimeCounters(gameInfo);
+      this.GameService.setDeadTools(gameInfo);
     });
     subscriptions.push(subscription);
   }
 
-  public onTableLoad(playerColor: boolean): void {
+  public onTableLoad(playerColor: boolean[]): void {
     this.playerColor = playerColor;
     this.setEdgeRowsPositions();
     for(let tool in this.toolsPosition) this.toolsClasses[tool] = new ToolsFactory(this.toolsPosition[tool]).class;
@@ -76,7 +79,7 @@ export class ChessTableService implements OnInit, OnDestroy {
   }
 
   public toolOnClick(toolInfo: ToolInfo): void {
-    if((toolInfo.color != this.colorTurn || toolInfo.color != this.playerColor) && !this.selectedTool) return;
+    if((toolInfo.color != this.colorTurn || toolInfo.color != this.playerColor[0]) && !this.selectedTool) return;
     if(this.selectedTool && this.selectedTool.color != toolInfo.color) {
       this.moveTool(toolInfo.position);
     } else this.selectTool(toolInfo);
@@ -100,26 +103,31 @@ export class ChessTableService implements OnInit, OnDestroy {
   }
 
   private moveTool(position: string): void {
-    if(!this.possibleMoves.includes(position)) return this.notAllowedMove();
-    this.possibleMoves.splice(0, this.possibleMoves.length);
+    let {possibleMoves, toolsPosition, toolsClasses} = this;
+    if(!possibleMoves.includes(position)) return this.notAllowedMove();
 
-    this.updateDataToolMoved(this.toolsPosition, position);
-    this.updateDataToolMoved(this.toolsClasses, position);
+    possibleMoves.splice(0, possibleMoves.length);
+    this.deadTool = toolsPosition[position] ? JSON.parse(JSON.stringify(toolsPosition[position])): null
 
-    this.toolsClasses[position].position  = position;
-    this.toolsPosition[position].position = position;
+    this.updateDataToolMoved(toolsPosition, position);
+    this.updateDataToolMoved(toolsClasses, position);
+
+    toolsClasses[position].position  = position;
+    toolsPosition[position].position = position;
 
     if(this.isCrowned(position)) this.coronationInfo = { position, color: this.colorTurn };
     else this.updateGameInfo(!this.colorTurn);
 
-    delete this.toolsPosition[position].selected;
+    delete toolsPosition[position].selected;
     delete this.selectedTool;
 
     this.colorTurn = !this.colorTurn;
   }
 
   public updateGameInfo(colorTurn: boolean = this.colorTurn): void {
-    this.GameService.updateGameInfo(colorTurn, this.thretsMap, this.moves + 1);
+    let {thretsMap, gameInfo, deadTool, toolsClasses, toolsPosition} = this;
+    this.gameStatus = KingGuard.checkGameState(thretsMap, toolsClasses, this.colorTurn, toolsPosition);
+    this.GameService.updateGameInfo(colorTurn, thretsMap, gameInfo, deadTool, this.gameStatus);
   }
 
   private updateDataToolMoved(data: object, position: string): void {

@@ -3,9 +3,11 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { shareReplay, take } from 'rxjs/operators';
 import { firstPosition } from '../data/toolsPosition';
-import { Connection, GameInfo } from '../interfaces/game-interfaces';
+import { GameInfo } from '../interfaces/game-interfaces';
 import { AuthService } from './auth.service';
 import { FierbaseService } from './firebase.service';
+import * as firebase from 'firebase/app';
+import 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +20,14 @@ export class GameCreatorService implements OnDestroy {
   private subscriptions: Subscription[] = [];
 
   constructor(
-    private fbs:         FierbaseService,
-    private AuthService: AuthService,
-    private Router:      Router,
+    private fbs:        FierbaseService,
+    private Auth:       AuthService,
+    private Router:     Router,
   ) {}
+
+  get timestamp() {
+    return firebase.default.firestore.FieldValue.serverTimestamp();
+  }
 
   setGameId(gameId): void {
     this.gameId = gameId;
@@ -32,7 +38,7 @@ export class GameCreatorService implements OnDestroy {
   }
 
   connectToGame(): void {
-    let uid = this.AuthService.user.uid;
+    let uid = this.Auth.user.uid;
     if(this.playerColor && !this.getGameId()) this.createGame(uid);
     else if(!this.playerColor) this.addPlayerToGame(uid);
   }
@@ -41,7 +47,7 @@ export class GameCreatorService implements OnDestroy {
     let subscription = this.fbs.gatUserGames(uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
       if(!games.length) this.addGame(uid);
       else {
-        let emptyGame = games[games.findIndex(game => !game['black_uid'])]
+        let emptyGame = games[games.findIndex(game => !game['black_uid'])];
         if(emptyGame) {
           this.gameId = emptyGame.id;
           this.saveGameId(emptyGame.id);
@@ -52,7 +58,7 @@ export class GameCreatorService implements OnDestroy {
   }
 
   addGame(uid: string): void {
-    this.fbs.addGame({ white_uid: uid, white_user: JSON.stringify(this.AuthService.user) }).then(docRef => {
+    this.fbs.addGame({ white_uid: uid, white_user: JSON.stringify(this.Auth.user) }).then(docRef => {
       this.saveGameId(docRef.id);
       this.gameId = docRef.id;
       this.listenToPlayerJoining();
@@ -61,9 +67,9 @@ export class GameCreatorService implements OnDestroy {
 
   addPlayerToGame(uid: string): void {
     let subscription = this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(game => {
-      if(!game.black_uid) this.fbs.updateGame({ black_uid: uid,black_user: JSON.stringify(this.AuthService.user) }, this.gameId);
+      if(!game.black_uid) this.fbs.updateGame({ black_uid: uid,black_user: JSON.stringify(this.Auth.user) }, this.gameId);
       this.saveGameId(this.gameId);
-      this.Router.navigate(['/chess'], {queryParams: {gameId: this.getGameId(), playerColor: '0'}});
+      this.Router.navigate(['/chess'], {queryParams: {gameId: this.getGameId(), uid}});
     });
     this.subscriptions.push(subscription);
   }
@@ -72,8 +78,8 @@ export class GameCreatorService implements OnDestroy {
     let subscription = this.fbs.getGameById(this.gameId).pipe(shareReplay(1)).subscribe(game => {
       if(!game['black_uid']) return;
       this.createGameInfo();
-      this.createGameConnection();
-      this.Router.navigate(['/chess'], {queryParams: {gameId: this.getGameId(), playerColor: '1'}});
+      this.createGameConnection(game.black_uid, game.white_uid);
+      this.Router.navigate(['/chess'], {queryParams: {gameId: this.getGameId(), uid: game.white_uid}});
     });
     this.subscriptions.push(subscription);
   }
@@ -85,8 +91,8 @@ export class GameCreatorService implements OnDestroy {
   createGameInfo(): void {
     let gameInfo: GameInfo = {
       game_id:    this.gameId,
-      start_date: new Date().getTime(),
-      last_date:  new Date().getTime(),
+      start_date: this.timestamp,
+      last_date:  this.timestamp,
       color_turn: true,
       moves:      0,
       game_time:  0,
@@ -94,19 +100,20 @@ export class GameCreatorService implements OnDestroy {
       white_time: 0,
       black_attacks: 0,
       white_attacks: 0,
-      black_dead_tools: '',
-      white_dead_tools: '',
+      black_dead_tools: [],
+      white_dead_tools: [],
       tools_position: this.toolsPsition,
-      threts_map: []
+      threts_map: [],
+      game_status: 'active game'
     }
-    this.fbs.addGameInfo(gameInfo)
+    this.fbs.addGameInfo(gameInfo);
   }
 
-  createGameConnection(): void {
-    let connection: Connection = {
-      game_id:      this.gameId,
-      black_player: new Date().getTime(),
-      white_player: new Date().getTime()
+  createGameConnection(black_uid: string, white_uid: string): void {
+    let connection = {
+      game_id:     this.gameId,
+      [black_uid]: true,
+      [white_uid]: true
     };
     this.fbs.addGameConnection(connection);
   }

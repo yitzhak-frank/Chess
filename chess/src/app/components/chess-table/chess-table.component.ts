@@ -18,7 +18,7 @@ export class ChessTableComponent implements OnInit {
   public isChess:        object;
   public colorTurn:      boolean;
   public coronationInfo: any;
-  @Input() playerColor:  boolean;
+  @Input() playerColor:  boolean[];
 
   constructor(private tableService: ChessTableService) {
     this.possibleMoves  = tableService.possibleMoves;

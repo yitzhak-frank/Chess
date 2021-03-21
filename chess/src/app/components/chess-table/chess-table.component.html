@@ -1,13 +1,13 @@
 <app-coronation *ngIf="coronationInfo?.position" [position]="coronationInfo?.position" [color]="coronationInfo?.color"
   (coronation)="coronation($event)">
 </app-coronation>
-<table [ngClass]="{white: playerColor}">
+<table [ngClass]="{white: playerColor[0]}">
   <tr *ngFor="let row of rows">
     <td *ngFor="let col of cols">
       <div [ngClass]="{canGo: possibleMoves.includes(col + row)}">
         <app-tool
           *ngIf="toolsPosition[col + row]; else emptyCell"
-          [playerColor]="playerColor"
+          [playerColor]="playerColor[0]"
           [toolInfo]="(toolsPosition[col + row]? toolsPosition[col + row]: {})"
           (cellClicked)="toolClicked($event)"
           [ngClass]="{

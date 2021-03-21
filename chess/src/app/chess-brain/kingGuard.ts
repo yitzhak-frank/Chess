@@ -5,7 +5,15 @@ class KingGuard {
 
   constructor() {}
 
-  static checkKingThrets(toolsPosition: object, toolsClasses: object, selectedTool: ToolInfo, colorTurn: boolean, possibleMoves: string[], kingPos: string): void {
+  static checkKingThrets(
+    toolsPosition: object,
+    toolsClasses:  object,
+    selectedTool:  ToolInfo,
+    colorTurn:     boolean,
+    possibleMoves: string[],
+    kingPos:       string
+  ): void {
+
     let deletedTool  = toolsPosition[selectedTool.position];
     let deletedClass = toolsClasses[selectedTool.position];
 
@@ -39,8 +47,14 @@ class KingGuard {
   }
 
   // check if moving the tool expose the king to threts
-  static checkIfMoveHasThret(defender: ToolInfo, attacker: Tool, king: string | null,
-    possibleMoves: string[], toolsPosition: object): void {
+  static checkIfMoveHasThret(
+    defender:      ToolInfo,
+    attacker:      Tool,
+    king:          string | null,
+    possibleMoves: string[],
+    toolsPosition: object
+  ): void {
+
     let moves = [...possibleMoves];
     let newPosition, originalTool, kingPos;
 
@@ -60,13 +74,13 @@ class KingGuard {
     possibleMoves.push(...moves);
   }
 
-  static checkGameState(thretsMap, toolsClasses, colorTurn, toolsPosition): void {
+  static checkGameState(thretsMap, toolsClasses, colorTurn, toolsPosition): string {
     let isChess = this.checkIfChess(thretsMap, toolsClasses, colorTurn, toolsPosition);
     if(isChess) {
       let kinsPos = isChess;
       let kingPossibleMoves = toolsClasses[kinsPos].getPossibleMoves();
-      this.checkChessmate(kinsPos, toolsPosition, toolsClasses, colorTurn, kingPossibleMoves);
-    } else this.checkStalemate(toolsPosition, toolsClasses, colorTurn);
+      return this.checkChessmate(kinsPos, toolsPosition, toolsClasses, colorTurn, kingPossibleMoves);
+    } else return this.checkStalemate(toolsPosition, toolsClasses, colorTurn);
   }
 
   static checkIfChess(thretsMap: string[], toolsClasses: object, colorTurn: boolean, toolsPosition): string {
@@ -81,17 +95,24 @@ class KingGuard {
     return isChess;
   }
 
-  static checkChessmate(kingPos: string, toolsPosition: object, toolsClasses: object, colorTurn: boolean, possibleMoves: string[]): void {
+  static checkChessmate(
+    kingPos:       string,
+    toolsPosition: object,
+    toolsClasses:  object,
+    colorTurn:     boolean,
+    possibleMoves: string[]
+  ): string {
+
     this.getKingPossibleMoves(toolsPosition[kingPos], toolsClasses, possibleMoves, toolsPosition, colorTurn);
-    if(possibleMoves.length) return;
-    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return;
-    console.log('Game over chessmate!!!');
+    if(possibleMoves.length) return 'active game';
+    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return 'active game';
+    return 'Game over chessmate!!!';
   }
 
-  static checkStalemate(toolsPosition, toolsClasses, colorTurn: boolean): void {
+  static checkStalemate(toolsPosition, toolsClasses, colorTurn: boolean): string {
     let kingPos = this.getKingPosition(toolsPosition, colorTurn);
-    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return;
-    console.log('Game over Stalemate!!!');
+    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return 'active game';
+    return 'Game over Stalemate!!!';
   }
 
   static checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn: boolean, kingPos: string): boolean {

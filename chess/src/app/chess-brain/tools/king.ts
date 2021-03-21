@@ -11,8 +11,10 @@ class King extends Tool {
     this.setIndex();
     this.thretsMap = [];
     this.possibleMoves = [];
+
     check(this.chessMatrix[this.index[0]][this.index[1] + 1]);
     check(this.chessMatrix[this.index[0]][this.index[1] - 1]);
+
     if(this.chessMatrix[this.index[0] + 1]) {
       check(this.chessMatrix[this.index[0] + 1][this.index[1]]);
       check(this.chessMatrix[this.index[0] + 1][this.index[1] + 1]);

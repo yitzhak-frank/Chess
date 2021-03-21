@@ -11,12 +11,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { AngularFireModule } from '@angular/fire';
 import { GameInfoComponent } from './components/game-info/game-info.component';
 import { ChessGameComponent } from './components/chess-game/chess-game.component';
+import { GamesListComponent } from './components/games-list/games-list.component';
 import { ChessTableComponent } from './components/chess-table/chess-table.component';
 import { CoronationComponent } from './components/coronation/coronation.component';
+import { TimeCounterComponent } from './components/time-counter/time-counter.component';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { GamesListComponent } from './components/games-list/games-list.component';
-import { TimeCounterComponent } from './components/time-counter/time-counter.component';
 
 @NgModule({
   declarations: [
@@ -27,10 +27,10 @@ import { TimeCounterComponent } from './components/time-counter/time-counter.com
     SignInComponent,
     GameInfoComponent,
     ChessGameComponent,
+    GamesListComponent,
     ChessTableComponent,
     CoronationComponent,
-    GamesListComponent,
-    TimeCounterComponent,
+    TimeCounterComponent
   ],
   imports: [
     BrowserModule,

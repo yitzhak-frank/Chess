@@ -11,6 +11,7 @@ class Knight extends Tool {
     this.setIndex();
     this.thretsMap = [];
     this.possibleMoves = [];
+
     if(this.chessMatrix[this.index[0] + 1]) check(this.chessMatrix[this.index[0] + 1][this.index[1] + 2]);
     if(this.chessMatrix[this.index[0] + 1]) check(this.chessMatrix[this.index[0] + 1][this.index[1] - 2]);
     if(this.chessMatrix[this.index[0] - 1]) check(this.chessMatrix[this.index[0] - 1][this.index[1] + 2]);

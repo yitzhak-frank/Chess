@@ -1,21 +1,27 @@
-import { shareReplay, switchMap } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
-import { FierbaseService } from './firebase.service';
-import { GameCreatorService } from 'src/app/services/game-creator.service';
 import { Injectable, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
-import { AuthService } from './auth.service';
-import { Router } from '@angular/router';
+import { GameInfo, TimeCounters } from '../interfaces/game-interfaces';
+import { shareReplay, switchMap } from 'rxjs/operators';
+import { GameCreatorService } from 'src/app/services/game-creator.service';
+import { FierbaseService } from './firebase.service';
 import { firstPosition } from '../data/toolsPosition';
+import { Subscription } from 'rxjs';
+import { AuthService } from './auth.service';
+import { ToolInfo } from '../interfaces/tool-interface';
+import { Router } from '@angular/router';
+import * as firebase from 'firebase/app';
+import 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService implements OnInit, OnDestroy {
 
-  private userId:      string
-  private playerColor: string;
-  private connector;
   private toolsPosition = firstPosition;
+  private connector;
+  private userId:        string
+  private playerColor:   string;
+  public  timeCounters:  TimeCounters = {gameTime: 0, blackTime: 0, whiteTime: 0};
+  public  deadTools = { black: [], white: [] };
   private subscriptions: Subscription[] = [];
   @Output() player2 = new EventEmitter();
 
@@ -26,7 +32,23 @@ export class GameService implements OnInit, OnDestroy {
     private Route:       Router,
   ) {}
 
+  get timestamp() {
+    return firebase.default.firestore.FieldValue.serverTimestamp();
+  }
+
   getGameId = () => localStorage['chess-game-id'];
+
+  setTimeCounters({game_time, black_time, white_time, last_date, color_turn}: GameInfo): void {
+    if(!last_date) return;
+    this.timeCounters['gameTime']  = this.calcTimePass(game_time, last_date);
+    this.timeCounters['blackTime'] = color_turn? black_time: this.calcTimePass(black_time, last_date);
+    this.timeCounters['whiteTime'] = color_turn? this.calcTimePass(white_time, last_date): white_time;
+  }
+
+  setDeadTools({black_dead_tools, white_dead_tools}: GameInfo): void {
+    this.deadTools['black'] = black_dead_tools.sort();
+    this.deadTools['white'] = white_dead_tools.sort();
+  }
 
   openGameSocket(gameId: string): void {
     let subscription = this.fbs.getGameInfoByGameId(gameId).valueChanges().pipe(shareReplay(1)).subscribe(([gameInfo]) => {
@@ -46,50 +68,39 @@ export class GameService implements OnInit, OnDestroy {
       switchMap((...[game]) => {
         if(!game) return;
         this.playerColor = game['black_uid'] === this.userId ? 'black_player' : 'white_player';
-        this.sendConnection();
         return this.fbs.getGameConnectionByGameId(gameId).valueChanges().pipe(shareReplay(1));
       })
-    ).subscribe(([connection]) => {
+    ).subscribe(([connection]: object[]) => {
       if(!connection) return;
-      let player2 = this.playerColor.includes('white') ? 'black_player' : 'white_player';
-      // if(
-      //   connection[this.playerColor] - connection[player2] > (1000 * 90) ||
-      //   connection[this.playerColor] - connection[player2] < (-1000 * 90)
-      // ) this.connectionFail();
-      console.log(this.playerColor,connection[this.playerColor] ,player2, connection[player2]);
-      console.log(
-        connection[this.playerColor] - connection[player2],
-        connection[this.playerColor] - connection[player2] > (1000 * 99),
-        connection[this.playerColor] - connection[player2] < (-1000 * 99)
-      );
+      for(let field in connection) if(!connection[field]) this.connectionFail();
     })
     this.subscriptions.push(subscription);
   }
 
-  sendConnection(): void {
-    let gameId = this.GameCreator.getGameId();
-    let connectionUpdate = {[this.playerColor]: new Date().getTime()};
-    this.connector = setInterval(() => {
-      //this.fbs.updateGameConnectionByGameId(connectionUpdate, gameId);
-    }, 1000 * 30);
-  }
-
   connectionFail(): void {
     console.log('connection fail');
-    clearInterval(this.connector);
-    this.Route.navigate(['/home']);
+    // this.Route.navigate(['/home']);
   }
 
-  updateGameInfo(color_turn: boolean, threts_map: string[], moves: number): void {
+  updateGameInfo(color_turn: boolean, threts_map: string[], oldInfo: GameInfo, deadTool: ToolInfo, gameStatus: string): void {
+    let playerTime      = color_turn ? 'black_time' : 'white_time';
+    let playerDeadTools = color_turn ? 'white_dead_tools' : 'black_dead_tools';
     let updatedInfo = {
       color_turn,
       threts_map,
-      moves,
+      moves:          oldInfo.moves + 1,
       tools_position: this.toolsPosition,
-      last_date: new Date().getTime(),
-      game_time: '00:00:00'
+      last_date:      this.timestamp,
+      game_time:      this.calcTimePass(oldInfo.game_time, oldInfo.last_date),
+      [playerTime]:   this.calcTimePass(oldInfo[playerTime], oldInfo.last_date),
+      [playerDeadTools]: deadTool ? [...oldInfo[playerDeadTools], deadTool.tool] : oldInfo[playerDeadTools],
+      game_status: gameStatus
     }
     this.fbs.updateGameInfoByGameId(updatedInfo, this.getGameId());
+  }
+
+  calcTimePass(time: number, lastDate): number {
+    return Number((time + ((Date.now() - lastDate.toDate().getTime()) / 1000)).toFixed(0));
   }
 
   ngOnInit() {}

@@ -5,8 +5,15 @@ class Castling {
 
   constructor() {}
 
-  static castlingManager(colorTurn: boolean, toolsPosition: object, toolsClasses: object,
-    chessMatrix: Array<string[]>, possibleMoves: string[], castlingInfo): void {
+  static castlingManager(
+    colorTurn:     boolean,
+    toolsPosition: object,
+    toolsClasses:  object,
+    chessMatrix:   Array<string[]>,
+    possibleMoves: string[],
+    castlingInfo:  object
+  ): void {
+
     let row = (colorTurn)? 0: 7, col = 4;
     let rightRook  = toolsPosition[chessMatrix[0][row]];
     let leftRook   = toolsPosition[chessMatrix[7][row]];
@@ -14,11 +21,11 @@ class Castling {
     let leftCells  = [chessMatrix[col + 1][row], chessMatrix[col + 2][row]];
 
     if(this.checkIfCastlingAllowed(rightRook, rightCells, toolsClasses, toolsPosition ,colorTurn)) {
-      castlingInfo.right = chessMatrix[col - 2][row];
+      castlingInfo['right'] = chessMatrix[col - 2][row];
       possibleMoves.push(chessMatrix[col - 2][row]);
     }
     if(this.checkIfCastlingAllowed(leftRook, leftCells, toolsClasses, toolsPosition ,colorTurn)) {
-      castlingInfo.left = chessMatrix[col + 2][row];
+      castlingInfo['left'] = chessMatrix[col + 2][row];
       possibleMoves.push(chessMatrix[col + 2][row]);
     }
   }
@@ -33,22 +40,43 @@ class Castling {
     } return true;
   }
 
-  static castlingDirection(position: string, castlingInfo, colorTurn: boolean, chessMatrix: Array<string[]>,
-    possibleMoves: string[], toolsPosition: object, toolsClasses: object, selectedTool: object, thretsMap: string[]): boolean {
+  static castlingDirection(
+    position:      string,
+    castlingInfo:  object,
+    colorTurn:     boolean,
+    chessMatrix:   Array<string[]>,
+    possibleMoves: string[],
+    toolsPosition: object,
+    toolsClasses:  object,
+    selectedTool:  ToolInfo,
+    thretsMap:     string[]
+  ): boolean {
+
     let row = (colorTurn)? 0: 7;
-    if(position === castlingInfo.right) {
-      castlingInfo.right = '';
+    if(position === castlingInfo['right']) {
+      castlingInfo['right'] = '';
       return this.doCastling(chessMatrix[4][row], chessMatrix[2][row], chessMatrix[0][row], chessMatrix[3][row],
         possibleMoves, toolsPosition, toolsClasses, selectedTool, colorTurn, thretsMap);
-    } else if(position === castlingInfo.left) {
-      castlingInfo.left = '';
+    } else if(position === castlingInfo['left']) {
+      castlingInfo['left'] = '';
       return this.doCastling(chessMatrix[4][row], chessMatrix[6][row], chessMatrix[7][row], chessMatrix[5][row],
         possibleMoves, toolsPosition, toolsClasses, selectedTool, colorTurn, thretsMap);
     }
   }
 
-  static doCastling(kingBefore: string, kingAfter: string, rookBefore: string, rookAfter: string,
-    possibleMoves, toolsPosition, toolsClasses, selectedTool, colorTurn, thretsMap): boolean {
+  static doCastling(
+    kingBefore:    string,
+    kingAfter:     string,
+    rookBefore:    string,
+    rookAfter:     string,
+    possibleMoves: string[],
+    toolsPosition: object,
+    toolsClasses:  object,
+    selectedTool:  ToolInfo,
+    colorTurn:     boolean,
+    thretsMap:     string[]
+  ): boolean {
+
     possibleMoves.splice(0, possibleMoves.length);
     this.updateDataCastling(kingBefore, kingAfter, toolsPosition, toolsClasses);
     this.updateDataCastling(rookBefore, rookAfter, toolsPosition, toolsClasses);

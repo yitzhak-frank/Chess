@@ -1,7 +1,14 @@
 <div class="player" [ngClass]="{white: color, black: !color}">
   <div class="user-details">
-    <img class="user-img" [src]="user?.photoURL" alt="user">
+    <img class="user-img" [src]="user?.photoURL" alt="user" referrerpolicy="no-referrer">
     <h6>{{user?.displayName}}</h6>
   </div>
-  <app-time-counter [startTime]="0" [color]="color"></app-time-counter>
+  <h6 class="text-center mt-3">Time Played</h6>
+  <app-time-counter [startTime]="counter" [color]="color"></app-time-counter>
+  <div *ngIf="deadTools?.length" class="dead-tools row">
+    <h6 class="col-12 text-center mt-3">Dead Tools</h6>
+    <div class="tool-wrapper col-4 p-1" *ngFor="let tool of deadTools">
+      <div class="tool">{{tool}}</div>
+    </div>
+  </div>
 </div>

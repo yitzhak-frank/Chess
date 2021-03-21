@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { shareReplay, take } from 'rxjs/operators';
-import { Connection, Game, GameInfo } from '../interfaces/game-interfaces';
+import { Game, GameInfo } from '../interfaces/game-interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ export class FierbaseService {
 
   private gamesRef:      AngularFirestoreCollection<Game>;
   private gamesInfoRef:  AngularFirestoreCollection<GameInfo>;
-  private connectionRef: AngularFirestoreCollection<Connection>;
+  private connectionRef: AngularFirestoreCollection;
 
   constructor(private afs: AngularFirestore) {
     this.gamesRef      = this.afs.collection('games', ref => ref);
@@ -19,7 +19,7 @@ export class FierbaseService {
   }
 
   gatUserGames(uid: string) {
-    return this.afs.collection('games', ref => ref.where('white_uid', '==', uid).orderBy('black_uid'))
+    return this.afs.collection('games', ref => ref.where('white_uid', '==', uid))
   }
 
   addGame(game: Game) {
@@ -30,7 +30,7 @@ export class FierbaseService {
     return this.gamesInfoRef.add(gameInfo);
   }
 
-  addGameConnection(connection: Connection) {
+  addGameConnection(connection) {
     return this.connectionRef.add(connection);
   }
 
@@ -62,12 +62,8 @@ export class FierbaseService {
     return this.afs.collection('connection', ref => ref.where('game_id', '==', gameId));
   }
 
-  // removeGame(id: string) {
-  //   return this.gamesRef.doc(id).delete();
-  // }
-
-  // removeGameConnection(id: string) {
-  //   return this.connectionRef.doc(id).delete();
-  // }
+  updateConnectionState(gameId: string, uid: string, isConnect: boolean): void {
+    this.updateGameConnectionByGameId({[uid]: isConnect}, gameId);
+  }
 
 }
