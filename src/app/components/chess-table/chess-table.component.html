@@ -1,0 +1,29 @@
+<app-coronation
+  *ngIf="coronationInfo?.position"
+  [position]="coronationInfo?.position"
+  [color]="coronationInfo?.color"
+  (coronation)="coronation($event)"
+></app-coronation>
+
+<div id="chess-table" >
+  <table [ngClass]="{white: playerColor[0]}">
+    <tr *ngFor="let row of rows">
+      <td *ngFor="let col of cols">
+        <div [ngClass]="{canGo: possibleMoves.includes(col + row)}">
+          <app-tool
+            *ngIf="toolsPosition[col + row]; else emptyCell"
+            [playerColor]="playerColor[0]"
+            [toolInfo]="toolsPosition[col + row]? toolsPosition[col + row]: {}"
+            (cellClicked)="toolClicked($event)"
+            [ngClass]="{
+              selected: toolsPosition[col + row].selected,
+              isChess: isChess['position'] === (col + row)
+          }"></app-tool>
+          <ng-template #emptyCell>
+            <div class="empty" (click)="cellClicked(col + row)"></div>
+          </ng-template>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
