@@ -1,4 +1,5 @@
 <div class="home-body" (click)="showLogin()">
+  <app-waiter (close)="disconnectFromGame()"></app-waiter>
   <div class="home-body-cover">
     <div class="top">
       <span class="heading">
@@ -18,8 +19,8 @@
           copy the link, send it to your game partner and start playing
         </p>
 
-        <button>Go To Games List</button>
-        <button *ngIf="!link; else gameLink" (click)="createGameLink()">Get New Game Link</button>
+        <button (click)="goToGamesList()">Go To Games List</button>
+        <button *ngIf="!link; else gameLink" (click)="connectToGame()">Get New Game Link</button>
 
         <ng-template #gameLink>
           <input type="text" #input [value]="link">

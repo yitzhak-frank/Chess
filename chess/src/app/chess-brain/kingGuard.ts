@@ -5,6 +5,15 @@ class KingGuard {
 
   constructor() {}
 
+  /**
+   * Checks if there is a tool that threatning on the king
+   * @param toolsPosition Object contains all tools positions.
+   * @param toolsClasses Object contains all tools classes.
+   * @param selectedTool Object contains the info of the selected tool such as position color etc.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   * @param possibleMoves Array contains all possible moves positions.
+   * @param kingPos String with the position of the king.
+   */
   static checkKingThrets(
     toolsPosition: object,
     toolsClasses:  object,
@@ -24,7 +33,7 @@ class KingGuard {
     else {
       for(let tool in toolsClasses) {
         if(toolsClasses[tool].color === colorTurn) continue;
-        if(toolsClasses[tool].getThretsMap().includes(kingPos))
+        if(toolsClasses[tool].getThreatsMap().includes(kingPos))
           this.checkIfMoveHasThret(deletedTool, toolsClasses[tool], kingPos, possibleMoves, toolsPosition);
       }
     }
@@ -34,11 +43,25 @@ class KingGuard {
     if(!possibleMoves.length) toolsPosition[selectedTool.position].selected = false;
   }
 
+  /**
+   *
+   * @param toolsPosition Object contains all tools positions.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   * @returns String with the position of the king.
+   */
   static getKingPosition(toolsPosition, colorTurn: boolean) {
     for(let pos in toolsPosition)
       if(toolsPosition[pos].rank === 'king' && toolsPosition[pos].color === colorTurn) return pos;
   }
 
+  /**
+   *
+   * @param king Object contains the info for the king, such as position color etc.
+   * @param toolsClasses Object contains all tools classes.
+   * @param possibleMoves Array contains all possible moves positions.
+   * @param toolsPosition Object contains all tools positions.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   */
   static getKingPossibleMoves(king: ToolInfo, toolsClasses, possibleMoves: string[], toolsPosition, colorTurn: boolean): void {
     for(let tool in toolsClasses) {
       if(toolsClasses[tool].color === colorTurn) continue;
@@ -46,7 +69,14 @@ class KingGuard {
     }
   }
 
-  // check if moving the tool expose the king to threts
+  /**
+   * Checks if moving the tool expose the king to threats.
+   * @param defender Object contains the info for the king, such as position color etc.
+   * @param attacker Class instance of the threatening tool.
+   * @param king String contains the king position | null if the defender is the king.
+   * @param possibleMoves Array contains all possible moves positions.
+   * @param toolsPosition Object contains all tools positions.
+   */
   static checkIfMoveHasThret(
     defender:      ToolInfo,
     attacker:      Tool,
@@ -67,15 +97,23 @@ class KingGuard {
       // if there is another tool in this position save it
       (newPosition)? originalTool = JSON.parse(JSON.stringify(newPosition)): originalTool = null;
       toolsPosition[possibleMoves[move]] = defender;
-      if(attacker.getThretsMap().includes(kingPos)) moves.splice(moves.indexOf(possibleMoves[move]), 1);
+      if(attacker.getThreatsMap().includes(kingPos)) moves.splice(moves.indexOf(possibleMoves[move]), 1);
       (originalTool)? toolsPosition[possibleMoves[move]] = originalTool: delete toolsPosition[possibleMoves[move]];
     }
     possibleMoves.splice(0, possibleMoves.length);
     possibleMoves.push(...moves);
   }
 
-  static checkGameState(thretsMap, toolsClasses, colorTurn, toolsPosition): string {
-    let isChess = this.checkIfChess(thretsMap, toolsClasses, colorTurn, toolsPosition);
+  /**
+   * Checks the game state if chessnate or stalemate.
+   * @param ThreatsMap Array contains all threatened positions.
+   * @param toolsClasses Object contains all tools classes.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   * @param toolsPosition Object contains all tools positions.
+   * @returns Call a function that check the state and returns string that describes the game state.
+   */
+  static checkGameState(ThreatsMap, toolsClasses, colorTurn, toolsPosition): string {
+    let isChess = this.checkIfChess(ThreatsMap, toolsClasses, colorTurn, toolsPosition);
     if(isChess) {
       let kinsPos = isChess;
       let kingPossibleMoves = toolsClasses[kinsPos].getPossibleMoves();
@@ -83,18 +121,35 @@ class KingGuard {
     } else return this.checkStalemate(toolsPosition, toolsClasses, colorTurn);
   }
 
-  static checkIfChess(thretsMap: string[], toolsClasses: object, colorTurn: boolean, toolsPosition): string {
+  /**
+   *
+   * @param threatsMap Array contains all threatened positions.
+   * @param toolsClasses Object contains all tools classes.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   * @param toolsPosition Object contains all tools positions.
+   * @returns String with the king position if chess | undefind if not.
+   */
+  static checkIfChess(threatsMap: string[], toolsClasses: object, colorTurn: boolean, toolsPosition): string {
     let kingPos = this.getKingPosition(toolsPosition, colorTurn);
     let isChess: string;
-    thretsMap.splice(0, thretsMap.length);
+    threatsMap.splice(0, threatsMap.length);
     for(let tool in toolsClasses) {
       if(colorTurn === toolsClasses[tool].color) continue;
-      if(toolsClasses[tool].getThretsMap().includes(kingPos)) isChess = kingPos;
-      thretsMap.push(...toolsClasses[tool].getThretsMap().filter(pos => !thretsMap.includes(pos)));
+      if(toolsClasses[tool].getThreatsMap().includes(kingPos)) isChess = kingPos;
+      threatsMap.push(...toolsClasses[tool].getThreatsMap().filter(pos => !threatsMap.includes(pos)));
     }
     return isChess;
   }
 
+  /**
+   *
+   * @param kingPos String with the position of the king.
+   * @param toolsPosition Object contains all tools positions.
+   * @param toolsClasses Object contains all tools classes.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   * @param possibleMoves Array contains all possible moves positions.
+   * @returns String that describes the game state.
+   */
   static checkChessmate(
     kingPos:       string,
     toolsPosition: object,
@@ -104,17 +159,33 @@ class KingGuard {
   ): string {
 
     this.getKingPossibleMoves(toolsPosition[kingPos], toolsClasses, possibleMoves, toolsPosition, colorTurn);
-    if(possibleMoves.length) return 'active game';
-    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return 'active game';
-    return 'Game over chessmate!!!';
+    if(possibleMoves.length) return 'Active game';
+    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return 'Active game';
+    let winner = colorTurn ? 'Black' : 'White';
+    return winner + 'Won';
   }
 
+  /**
+   *
+   * @param toolsPosition Object contains all tools positions.
+   * @param toolsClasses Object contains all tools classes.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   * @returns String that describes the game state.
+   */
   static checkStalemate(toolsPosition, toolsClasses, colorTurn: boolean): string {
     let kingPos = this.getKingPosition(toolsPosition, colorTurn);
-    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return 'active game';
-    return 'Game over Stalemate!!!';
+    if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return 'Active game';
+    return 'Stalemate';
   }
 
+  /**
+   *
+   * @param toolsPosition Object contains all tools positions.
+   * @param toolsClasses Object contains all tools classes.
+   * @param colorTurn Boolean represents the color, true = white and false = black.
+   * @param kingPos String with the position of the king.
+   * @returns Boolean - true if there is a tool that can move and false if not.
+   */
   static checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn: boolean, kingPos: string): boolean {
     for(let tool in toolsPosition) {
       if(toolsPosition[tool].color != colorTurn) continue;

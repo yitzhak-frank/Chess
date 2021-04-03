@@ -62,8 +62,4 @@ export class FierbaseService {
     return this.afs.collection('connection', ref => ref.where('game_id', '==', gameId));
   }
 
-  updateConnectionState(gameId: string, uid: string, isConnect: boolean): void {
-    this.updateGameConnectionByGameId({[uid]: isConnect}, gameId);
-  }
-
 }

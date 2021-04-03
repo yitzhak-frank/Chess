@@ -21,10 +21,6 @@ export class UserStatusService {
     return firebase.default.database.ServerValue.TIMESTAMP;
   }
 
-  getPresence(uid: string) {
-    return this.db.object(`status/${uid}`).valueChanges();
-  }
-
   getUser() {
     return this.afa.authState.pipe(first()).toPromise();
   }

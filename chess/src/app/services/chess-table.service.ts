@@ -21,24 +21,24 @@ export class ChessTableService implements OnInit, OnDestroy {
   public  colorTurn:        boolean  = true;
   private selectedTool:     ToolInfo;
   public  possibleMoves:    string[] = [];
-  private thretsMap:        string[] = [];
+  private threatsMap:       string[] = [];
   private edgeRowsPositins: string[] = [];
-  public  castlingInfo:     any = { right: '', left: '' };
   public  coronationInfo:   object;
   private subscriptions:    Subscription[] = [];
-  public  isChess:          object = {position: '', color: false};
   public  gameInfo:         GameInfo;
   private deadTool:         ToolInfo;
   public  gameStatus:       string;
+  public  castlingInfo = { right: '', left: '' };
+  public  isChess = { position: '', color: false };
 
   constructor(private GameService: GameService) {
     this.getGameData();
   }
 
   getGameData() {
-    let {toolsPosition, toolsClasses, GameService, subscriptions, thretsMap, isChess} = this;
-    let subscription = GameService.player2.subscribe((gameInfo) => {
-      let {tools_position, threts_map, color_turn} = gameInfo;
+    let {toolsPosition, toolsClasses, GameService, subscriptions, threatsMap, isChess} = this;
+    let subscription = GameService.player2Move.subscribe((gameInfo) => {
+      let {tools_position, threats_map, color_turn} = gameInfo;
 
       for(let tool in toolsPosition)  delete toolsPosition[tool];
       for(let tool in toolsClasses)   if(!toolsPosition[tool]) delete toolsClasses[tool];
@@ -47,13 +47,13 @@ export class ChessTableService implements OnInit, OnDestroy {
 
       this.colorTurn = color_turn;
 
-      thretsMap.splice(0, thretsMap.length);
-      thretsMap.push(...threts_map);
+      threatsMap.splice(0, threatsMap.length);
+      threatsMap.push(...threats_map);
 
-      isChess['position'] = KingGuard.checkIfChess(thretsMap, toolsClasses, this.colorTurn, toolsPosition);
+      isChess['position'] = KingGuard.checkIfChess(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
       isChess['color']    = this.colorTurn;
 
-      KingGuard.checkGameState(thretsMap, toolsClasses, this.colorTurn, toolsPosition);
+      KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
       this.gameInfo = gameInfo;
 
       this.GameService.setTimeCounters(gameInfo);
@@ -69,10 +69,10 @@ export class ChessTableService implements OnInit, OnDestroy {
   }
 
   public emptyCellOnClick(position: string): void {
-    let { castlingInfo, colorTurn, chessMatrix, possibleMoves, toolsPosition, toolsClasses, selectedTool, thretsMap } = this
+    let { castlingInfo, colorTurn, chessMatrix, possibleMoves, toolsPosition, toolsClasses, selectedTool, threatsMap } = this
     if(position === castlingInfo.right || position === castlingInfo.left) {
       this.colorTurn = Castling.castlingDirection(
-        position, castlingInfo, colorTurn, chessMatrix, possibleMoves, toolsPosition, toolsClasses, selectedTool, thretsMap
+        position, castlingInfo, colorTurn, chessMatrix, possibleMoves, toolsPosition, toolsClasses, selectedTool, threatsMap
       );
       this.updateGameInfo();
     } else if(selectedTool) this.moveTool(position);
@@ -86,7 +86,7 @@ export class ChessTableService implements OnInit, OnDestroy {
   }
 
   private selectTool(toolInfo: ToolInfo): void {
-    let { possibleMoves, toolsClasses, toolsPosition, selectedTool, thretsMap, castlingInfo ,colorTurn } = this;
+    let { possibleMoves, toolsClasses, toolsPosition, selectedTool, threatsMap, castlingInfo ,colorTurn } = this;
     possibleMoves.splice(0, possibleMoves.length);
     possibleMoves.push(...toolsClasses[toolInfo.position].getPossibleMoves());
 
@@ -98,7 +98,7 @@ export class ChessTableService implements OnInit, OnDestroy {
     let kingPos = toolInfo.rank != 'king'? KingGuard.getKingPosition(this.toolsPosition, this.colorTurn): toolInfo.position;
     KingGuard.checkKingThrets(toolsPosition, toolsClasses, this.selectedTool, colorTurn, possibleMoves, kingPos);
 
-    if(toolInfo.rank == 'king' && !thretsMap.includes(toolInfo.position) && toolInfo.isVirgin)
+    if(toolInfo.rank == 'king' && !threatsMap.includes(toolInfo.position) && toolInfo.isVirgin)
       Castling.castlingManager(colorTurn, toolsPosition, toolsClasses, chessMatrix, possibleMoves, castlingInfo);
   }
 
@@ -125,9 +125,9 @@ export class ChessTableService implements OnInit, OnDestroy {
   }
 
   public updateGameInfo(colorTurn: boolean = this.colorTurn): void {
-    let {thretsMap, gameInfo, deadTool, toolsClasses, toolsPosition} = this;
-    this.gameStatus = KingGuard.checkGameState(thretsMap, toolsClasses, this.colorTurn, toolsPosition);
-    this.GameService.updateGameInfo(colorTurn, thretsMap, gameInfo, deadTool, this.gameStatus);
+    let {threatsMap, gameInfo, deadTool, toolsClasses, toolsPosition} = this;
+    this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
+    this.GameService.updateGameInfo(colorTurn, threatsMap, gameInfo, deadTool, this.gameStatus);
   }
 
   private updateDataToolMoved(data: object, position: string): void {

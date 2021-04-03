@@ -7,9 +7,13 @@ class Bishop extends Tool {
     super(toolInfo);
   }
 
+  /**
+   * Calcs the optionals moves for the tool
+   * @param check Function that checks the possible moves or the threth map and adds it to their prop
+   */
   public calcPossibleMoves(check: (currentCell: string) => boolean | void): void {
     this.setIndex();
-    this.thretsMap = [];
+    this.threatsMap = [];
     this.possibleMoves = [];
 
     for(let i = 1; (i + this.index[0] < 8) && (i + this.index[1] < 8); i++)

@@ -1,14 +1,12 @@
 import { Injectable, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
 import { GameInfo, TimeCounters } from '../interfaces/game-interfaces';
-import { shareReplay, switchMap } from 'rxjs/operators';
-import { GameCreatorService } from 'src/app/services/game-creator.service';
 import { FierbaseService } from './firebase.service';
 import { firstPosition } from '../data/toolsPosition';
 import { Subscription } from 'rxjs';
-import { AuthService } from './auth.service';
+import { shareReplay } from 'rxjs/operators';
 import { ToolInfo } from '../interfaces/tool-interface';
-import { Router } from '@angular/router';
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
+import * as Firebase from 'firebase/app';
 import 'firebase/firestore';
 
 @Injectable({
@@ -18,25 +16,21 @@ export class GameService implements OnInit, OnDestroy {
 
   private toolsPosition = firstPosition;
   private connector;
-  private userId:        string
-  private playerColor:   string;
   public  timeCounters:  TimeCounters = {gameTime: 0, blackTime: 0, whiteTime: 0};
   public  deadTools = { black: [], white: [] };
   private subscriptions: Subscription[] = [];
-  @Output() player2 = new EventEmitter();
+  public  player2:       firebase.User
+  @Output() player2Move = new EventEmitter();
 
-  constructor(
-    private fbs:         FierbaseService,
-    private GameCreator: GameCreatorService,
-    private AuthService: AuthService,
-    private Route:       Router,
-  ) {}
+  constructor(private fbs: FierbaseService) {}
 
   get timestamp() {
-    return firebase.default.firestore.FieldValue.serverTimestamp();
+    return Firebase.default.firestore.FieldValue.serverTimestamp();
   }
 
-  getGameId = () => localStorage['chess-game-id'];
+  get gameId() {
+    return localStorage['chess-game-id'];
+  }
 
   setTimeCounters({game_time, black_time, white_time, last_date, color_turn}: GameInfo): void {
     if(!last_date) return;
@@ -53,50 +47,27 @@ export class GameService implements OnInit, OnDestroy {
   openGameSocket(gameId: string): void {
     let subscription = this.fbs.getGameInfoByGameId(gameId).valueChanges().pipe(shareReplay(1)).subscribe(([gameInfo]) => {
       if(!gameInfo) return;
-      this.player2.emit(gameInfo);
+      this.player2Move.emit(gameInfo);
     });
     this.subscriptions.push(subscription);
   }
 
-  openGameConnection(gameId: string): void {
-    let subscription = this.AuthService.getUserId().pipe(
-      switchMap((...[{uid}]) => {
-        if(!uid) return;
-        this.userId = uid;
-        return this.fbs.getGameById(this.getGameId());
-      }),
-      switchMap((...[game]) => {
-        if(!game) return;
-        this.playerColor = game['black_uid'] === this.userId ? 'black_player' : 'white_player';
-        return this.fbs.getGameConnectionByGameId(gameId).valueChanges().pipe(shareReplay(1));
-      })
-    ).subscribe(([connection]: object[]) => {
-      if(!connection) return;
-      for(let field in connection) if(!connection[field]) this.connectionFail();
-    })
-    this.subscriptions.push(subscription);
-  }
-
-  connectionFail(): void {
-    console.log('connection fail');
-    // this.Route.navigate(['/home']);
-  }
-
-  updateGameInfo(color_turn: boolean, threts_map: string[], oldInfo: GameInfo, deadTool: ToolInfo, gameStatus: string): void {
-    let playerTime      = color_turn ? 'black_time' : 'white_time';
-    let playerDeadTools = color_turn ? 'white_dead_tools' : 'black_dead_tools';
+  updateGameInfo(color_turn: boolean, threats_map: string[], oldInfo: GameInfo, deadTool: ToolInfo, gameStatus: string): void {
+    let playerTime  = color_turn ? 'black_time' : 'white_time';
+    let playerKills = color_turn ? 'white_dead_tools' : 'black_dead_tools';
     let updatedInfo = {
       color_turn,
-      threts_map,
+      threats_map,
       moves:          oldInfo.moves + 1,
       tools_position: this.toolsPosition,
       last_date:      this.timestamp,
       game_time:      this.calcTimePass(oldInfo.game_time, oldInfo.last_date),
       [playerTime]:   this.calcTimePass(oldInfo[playerTime], oldInfo.last_date),
-      [playerDeadTools]: deadTool ? [...oldInfo[playerDeadTools], deadTool.tool] : oldInfo[playerDeadTools],
-      game_status: gameStatus
+      [playerKills]:  deadTool ? [...oldInfo[playerKills], deadTool.tool] : oldInfo[playerKills],
+      game_status:    gameStatus,
+      chess_table:    document.querySelector('#chess-table').innerHTML
     }
-    this.fbs.updateGameInfoByGameId(updatedInfo, this.getGameId());
+    this.fbs.updateGameInfoByGameId(updatedInfo, this.gameId);
   }
 
   calcTimePass(time: number, lastDate): number {

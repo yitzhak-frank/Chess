@@ -6,7 +6,7 @@
   <h6 class="text-center mt-3">Time Played</h6>
   <app-time-counter [startTime]="counter" [color]="color"></app-time-counter>
   <div *ngIf="deadTools?.length" class="dead-tools row">
-    <h6 class="col-12 text-center mt-3">Dead Tools</h6>
+    <h6 class="col-12 text-center mt-3">Kills</h6>
     <div class="tool-wrapper col-4 p-1" *ngFor="let tool of deadTools">
       <div class="tool">{{tool}}</div>
     </div>
