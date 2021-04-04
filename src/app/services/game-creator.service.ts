@@ -57,8 +57,8 @@ export class GameCreatorService implements OnDestroy {
   }
 
   // set the game for the user to play
-  createGame(uid: string): void {
-    let subscription = this.fbs.gatUserGames(uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
+  createGame(uid: string, callback?): void {
+    let subscription = this.fbs.gatUserGames('white_uid',uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
       if(!games.length) this.addGame(uid);
       else {
         let emptyGame = games[games.findIndex(game => !game['black_uid'])];
@@ -66,6 +66,7 @@ export class GameCreatorService implements OnDestroy {
         else if(!this.gameId) this.addGame(uid);
       }
       this.Connection.startListening(uid);
+      if(callback) callback();
     });
     this.subscriptions.push(subscription);
   }

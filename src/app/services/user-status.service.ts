@@ -46,8 +46,7 @@ export class UserStatusService {
       shareReplay(1),
       tap(user => {
         if (!user) return;
-        this.db.object(`status/${user.uid}`).query.ref.onDisconnect()
-        .update({status: 'offline', timestamp: this.timestamp});
+        this.db.object(`status/${user.uid}`).query.ref.onDisconnect().update({status: 'offline', timestamp: this.timestamp});
       })
     );
   }

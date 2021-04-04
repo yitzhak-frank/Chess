@@ -44,7 +44,12 @@ export class ConnectionListenerService implements OnDestroy {
       }
     });
     this.isListening = true;
-    this.subscriptions.push(sub);
+    this.subscriptions[0] = sub;
+  }
+
+  stopListening(): void {
+    this.subscriptions[0].unsubscribe();
+    this.isListening = false;
   }
 
   listenToUserStatus(uid: string): void {
@@ -56,7 +61,7 @@ export class ConnectionListenerService implements OnDestroy {
         this.connectToGame(uid);
       }
     });
-    this.subscriptions.push(subscription);
+    this.subscriptions[1] = subscription;
   }
 
   connectToGame(uid: string): void {

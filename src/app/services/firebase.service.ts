@@ -18,8 +18,8 @@ export class FierbaseService {
     this.connectionRef = this.afs.collection('connection', ref => ref);
   }
 
-  gatUserGames(uid: string) {
-    return this.afs.collection('games', ref => ref.where('white_uid', '==', uid))
+  gatUserGames(field: string, uid: string) {
+    return this.afs.collection('games', ref => ref.where(field, '==', uid))
   }
 
   addGame(game: Game) {

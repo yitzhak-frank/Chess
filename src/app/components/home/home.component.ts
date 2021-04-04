@@ -46,7 +46,7 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
     setTimeout(() => ids.forEach(id => document.getElementById(id).style.transform = 'translate(0)'), 1)
   }
 
-  createGameLink(): void {
+  private createGameLink() {
     this.link = `${url}/home?gameId=${this.GameCreator.gameId}`;
   }
 
@@ -55,8 +55,13 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   connectToGame(): void {
+    if(!this.GameCreator.gameId) return this.createGame();
     this.createGameLink();
     this.Connection.connectToGame(this.user.uid);
+  }
+
+  createGame(): void {
+    this.GameCreator.createGame(this.user.uid, () => this.connectToGame());
   }
 
   disconnectFromGame(): void {

@@ -1,9 +1,10 @@
 import { Injectable, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
 import { GameInfo, TimeCounters } from '../interfaces/game-interfaces';
+import { shareReplay, switchMap, take } from 'rxjs/operators';
 import { FierbaseService } from './firebase.service';
 import { firstPosition } from '../data/toolsPosition';
 import { Subscription } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+import { AuthService } from './auth.service';
 import { ToolInfo } from '../interfaces/tool-interface';
 import firebase from 'firebase/app';
 import * as Firebase from 'firebase/app';
@@ -15,14 +16,16 @@ import 'firebase/firestore';
 export class GameService implements OnInit, OnDestroy {
 
   private toolsPosition = firstPosition;
-  private connector;
+  private connector; // interval id
   public  timeCounters:  TimeCounters = {gameTime: 0, blackTime: 0, whiteTime: 0};
   public  deadTools = { black: [], white: [] };
   private subscriptions: Subscription[] = [];
   public  player2:       firebase.User
   @Output() player2Move = new EventEmitter();
 
-  constructor(private fbs: FierbaseService) {}
+  constructor(private fbs: FierbaseService, private Auth: AuthService) {
+    this.setPlayer2();
+  }
 
   get timestamp() {
     return Firebase.default.firestore.FieldValue.serverTimestamp();
@@ -30,6 +33,13 @@ export class GameService implements OnInit, OnDestroy {
 
   get gameId() {
     return localStorage['chess-game-id'];
+  }
+
+  setPlayer2(): void {
+    this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe((...[game]) => {
+      let player2 = this.Auth.user.uid === game['black_user'] ? 'black_user' : 'white_user';
+      if(game[player2]) this.player2 = JSON.parse(game[player2]);
+    })
   }
 
   setTimeCounters({game_time, black_time, white_time, last_date, color_turn}: GameInfo): void {
