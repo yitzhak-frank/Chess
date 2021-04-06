@@ -37,27 +37,32 @@ export class GameCreatorService implements OnDestroy {
   }
 
   // set current game id
-  setGameId(gameId: string) {
+  public setGameId(gameId: string) {
     localStorage['chess-game-id'] = gameId;
   }
 
-  removeGameId() {
+  public removeGameId() {
     delete localStorage['chess-game-id'];
   }
 
   // set if player is white (true) or black (false)
-  setPlayerColor(playerColor): void {
+  public setPlayerColor(playerColor): void {
     this.playerColor = playerColor;
   }
 
-  joinToGame(): void {
+  public joinToGame(): void {
     let uid = this.Auth.user.uid;
     if(this.playerColor && !this.gameId) this.createGame(uid);
     else if(!this.playerColor) this.addPlayerToGame(uid);
   }
 
-  // set the game for the user to play
-  createGame(uid: string, callback?): void {
+  //
+  /**
+   * Sets new game for the user to play.
+   * @param uid String with the user id.
+   * @param callback Function contains actions to do after getting the game id.
+   */
+  public createGame(uid: string, callback?: () => void): void {
     let subscription = this.fbs.gatUserGames('white_uid',uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
       if(!games.length) this.addGame(uid);
       else {
@@ -72,7 +77,7 @@ export class GameCreatorService implements OnDestroy {
   }
 
   // add game in db
-  addGame(uid: string): void {
+  private addGame(uid: string): void {
     this.fbs.addGame({ white_uid: uid, white_user: JSON.stringify(this.Auth.user)}).then(docRef => {
       this.setGameId(docRef.id);
       this.fbs.addGameConnection({[uid]: false, game_id: this.gameId});
@@ -81,7 +86,7 @@ export class GameCreatorService implements OnDestroy {
   }
 
   // when user connect with game url add him directly to the game
-  addPlayerToGame(uid: string): void {
+  private addPlayerToGame(uid: string): void {
     let subscription = this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(game => {
       if(!game.black_uid) {
         this.fbs.updateGame({ black_uid: uid,black_user: JSON.stringify(this.Auth.user) }, this.gameId);
@@ -93,7 +98,7 @@ export class GameCreatorService implements OnDestroy {
     this.subscriptions.push(subscription);
   }
 
-  createGameInfo(): void {
+  private createGameInfo(): void {
     let gameInfo: GameInfo = {
       game_id:    this.gameId,
       start_date: this.timestamp,

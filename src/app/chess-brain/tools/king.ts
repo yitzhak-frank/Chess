@@ -8,8 +8,8 @@ class King extends Tool {
   }
 
   /**
-   * Calcs the optionals moves for the tool
-   * @param check Function that checks the possible moves or the threth map and adds it to their prop
+   * Calcs the optional moves for the tool
+   * @param check Function that checks the possible moves or the threth map adds it to their prop and returns true to stop checking
    */
   public calcPossibleMoves(check: (currentCell: string) => void): void {
     this.setIndex();

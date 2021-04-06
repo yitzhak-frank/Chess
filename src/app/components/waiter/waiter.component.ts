@@ -1,11 +1,9 @@
-import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ConnectionListenerService } from '../../services/connection.service';
 import { GameService } from 'src/app/services/game.service';
 
 @Component({
   selector: 'app-waiter',
-  providers: [Location, { provide: LocationStrategy, useClass: PathLocationStrategy }],
   templateUrl: './waiter.component.html',
   styleUrls: ['./waiter.component.scss']
 })
@@ -17,13 +15,12 @@ export class WaiterComponent implements OnInit {
 
   constructor(
     private Connection: ConnectionListenerService,
-    private Game: GameService,
-    private Location: Location
+    private Game: GameService
   ) {}
 
   setContent(): void {
-    if(this.Location.path().includes('chess')) {
-      this.content = {btn: 'End Game', text: `${this.Game.player2.displayName} left the game`};
+    if(location.pathname.includes('chess')) {
+      this.content = {btn: 'Exit Game', text: `${this.Game.player2.displayName} left the game`};
     } else this.content = {btn: 'Cancel', text: 'Waiting for player to join the game'};
   }
 

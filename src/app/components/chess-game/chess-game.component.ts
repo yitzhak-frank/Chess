@@ -5,6 +5,7 @@ import { FierbaseService } from 'src/app/services/firebase.service';
 import { TimeCounters } from 'src/app/interfaces/game-interfaces';
 import { AuthService } from 'src/app/services/auth.service';
 import { GameService } from 'src/app/services/game.service';
+import { Location } from '@angular/common';
 import { take } from 'rxjs/operators';
 import firebase from 'firebase/app';
 
@@ -30,7 +31,8 @@ export class ChessGameComponent implements OnInit {
     private GameService: GameService,
     private Router:      Router,
     private Connection:  ConnectionListenerService,
-    private Auth:        AuthService
+    private Auth:        AuthService,
+    private Location:    Location
   ) {
     this.timeCounters = GameService.timeCounters;
     this.deadTools    = GameService.deadTools;
@@ -40,14 +42,22 @@ export class ChessGameComponent implements OnInit {
     localStorage['chess-game-id'] = gameId;
   }
 
-  exitGame(): void {
-    this.Connection.disconnectFromGame(this.uid);
-    this.Router.navigate(['/home']);
+  leavePage(e): void {
+    if(!confirm('Are you sure that you want to leave the game?')) return;
+    this.exitGame(e);
   }
 
-  async ngOnInit() {
-    let user = await this.Auth.user$.pipe(take(1)).toPromise();
-    if(!user) return this.Router.navigate(['/home']);
+  exitGame(path): void {
+    this.Connection.disconnectFromGame(this.uid);
+    if(path === 'Home') this.Router.navigate(['/home']);
+    else this.Location.back();
+  }
+
+  ngOnInit(): void {
+    (async () => {
+      let user = await this.Auth.user$.pipe(take(1)).toPromise();
+      if(!user) return this.Router.navigate(['/home']);
+    })()
 
     this.Route.queryParams.pipe(take(1)).subscribe(params => {
 

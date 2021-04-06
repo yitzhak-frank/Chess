@@ -1,4 +1,3 @@
-import firebase from 'firebase/app';
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
@@ -8,13 +7,26 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class PlayerComponent implements OnInit {
 
-  @Input() user:      firebase.User;
-  @Input() color:     boolean;
-  @Input() counter:   number;
-  @Input() deadTools: string[];
+  @Input() name:       string;
+  @Input() image:      string;
+  @Input() color:      boolean;
+  @Input() counter:    number;
+  @Input() time:       string;
+  @Input() deadTools:  string[];
+  public   killsScore: number;
 
   constructor() {}
 
-  ngOnInit(): void {}
+  calcScore(tools: string[]): number {
+    let reader = {['♙♟']: 1, ['♘♗♞♝']: 3, ['♖♜']: 5, ['♕♛']: 9};
+    let score: number = 0;
+    let ranks: string[] = Object.keys(reader);
+    for(let tool of tools) ranks.forEach(rank => rank.includes(tool) ? score += reader[rank]:null);
+    return score;
+  }
+
+  ngOnInit(): void {
+    if(this.deadTools) this.killsScore = this.calcScore(this.deadTools);
+  }
 
 }

@@ -10,15 +10,17 @@ import { PlayerComponent } from './components/player/player.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
 import { AngularFireModule } from '@angular/fire';
-import { GameInfoComponent } from './components/game-info/game-info.component';
 import { GameCardComponent } from './components/game-card/game-card.component';
 import { ChessGameComponent } from './components/chess-game/chess-game.component';
 import { GamesListComponent } from './components/games-list/games-list.component';
 import { ChessTableComponent } from './components/chess-table/chess-table.component';
 import { CoronationComponent } from './components/coronation/coronation.component';
+import { GameDetailsComponent } from './components/game-details/game-details.component';
 import { TimeCounterComponent } from './components/time-counter/time-counter.component';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { BackHomeBtnComponent } from './components/back-home-btn/back-home-btn.component';
+import { CopyLinkComponent } from './components/copy-link/copy-link.component';
 
 @NgModule({
   declarations: [
@@ -29,12 +31,14 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
     SignInComponent,
     WaiterComponent,
     GameCardComponent,
-    GameInfoComponent,
     ChessGameComponent,
     GamesListComponent,
     ChessTableComponent,
     CoronationComponent,
-    TimeCounterComponent
+    TimeCounterComponent,
+    GameDetailsComponent,
+    BackHomeBtnComponent,
+    CopyLinkComponent
   ],
   imports: [
     BrowserModule,

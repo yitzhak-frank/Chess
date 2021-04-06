@@ -1,0 +1,83 @@
+button {
+  display: block;
+  width: 100%;
+  height: 40px;
+  max-height: 40px;
+  border-radius: 10px;
+  background-image: linear-gradient(to left, rgba(216, 166, 59, 0.7), rgba(200, 211, 212, 0.7));
+  transition: 0.3s;
+  outline: none;
+  color: white;
+  text-shadow: 0 0 8px gray;
+
+  &:hover {
+    cursor: pointer;
+    background-image: linear-gradient(to left, rgba(216, 166, 59, 1), rgba(200, 211, 212, 1));
+    transform: scale(1.01);
+    box-shadow: 2px 2px 8px gray;
+  }
+}
+
+input {
+  width: 100%;
+  border: none;
+  outline: none;
+  color: rgb(30, 30, 30);
+  text-shadow: 0 0 2px white;
+  max-height: 35px;
+  border-radius: 5px;
+  padding: 10px;
+  padding-left: 60px;
+  background-image: linear-gradient(to left, rgba(216, 166, 59, 0.7), rgba(200, 211, 212, 0.7));
+}
+
+strong {
+  text-align: left;
+  display: block;
+  padding: 10px;
+  text-shadow: 0 0 12px black;
+  color: white;
+  transform: translate(0, -40px);
+
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.1) translate(13px, -36px);
+  }
+
+  &:hover + .copy-tooltip {
+    display: block;
+  }
+}
+
+.copy-tooltip,
+.copied-tooltip {
+  position: absolute;
+  bottom: -15px;
+  background-color: rgba(0,0,0,0.9);
+  z-index: 3;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 16px gray;
+
+  &:before {
+    content:"";
+    position: absolute;
+    right: calc(50% - 8px);
+    top: 0;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-right: 16px solid rgba(0,0,0,0.9);
+    border-bottom: 8px solid transparent;
+    transform: rotate(-27.5deg) translate(0, -13px);
+ }
+}
+.copy-tooltip {
+  display: none;
+  left: 150px;
+}
+
+.copied-tooltip {
+  left: 120px;
+}

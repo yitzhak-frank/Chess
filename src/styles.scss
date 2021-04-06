@@ -1,4 +1,30 @@
-/* You can add global styles to this file, and also import other style files */
+@mixin media-query($size) {
+
+  @if ($size == xl) {
+      @media (max-width: 1200px) {
+          @content;
+      }
+  }
+
+  @else if ($size == lg) {
+      @media (max-width: 991px) {
+          @content;
+      }
+  }
+
+  @else if ($size == md) {
+      @media (max-width: 768px) {
+          @content;
+      }
+  }
+
+  @else if ($size == sm) {
+      @media (max-width: 576px) {
+          @content;
+      }
+  }
+}
+
 html {
   margin: 0;
   padding: 0;
@@ -6,4 +32,65 @@ html {
 body {
   margin: 0;
   padding: 0;
+}
+/*
+* Style for game-details component because the table content coming from inner html attribute
+*/
+.game-details {
+  table {
+    box-shadow: 0 0 16px black;
+    border: 25px solid rgb(82, 82, 82);
+    border-collapse: collapse;
+    margin: 0 auto;
+    box-sizing: border-box;
+
+    @include media-query(lg) {
+      border: 18px solid rgb(82, 82, 82);
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    @include media-query(sm) {
+      border: 12px solid rgb(82, 82, 82);
+    }
+
+    td {
+      text-align: center;
+      font-size: 2.5rem;
+
+      @include media-query(lg) {
+        font-size: 1.7rem;
+      }
+
+      @include media-query(sm) {
+        font-size: 1.2rem;
+      }
+
+      div {
+        height: 60px;
+        width: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        @include media-query(lg) {
+          width: 40px;
+          height: 40px;
+        }
+
+        @include media-query(sm) {
+          width: 32px;
+          height: 32px;
+        }
+      }
+    }
+  }
+
+  tr:nth-child(even) td:nth-child(even), tr:nth-child(odd) td:nth-child(odd) {
+    background: rgba(128, 128, 128, 0.95);
+  }
+
+  tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.95);
+  }
 }

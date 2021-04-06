@@ -1,7 +1,8 @@
+<app-back-home-btn></app-back-home-btn>
 <app-waiter (close)="disconnectFromGame()"></app-waiter>
 <div class="games pt-lg-3">
-  <div class="container mt-5">
-  <h1 class="text-light mb-3">Your Games</h1>
+  <div class="container mt-5 pt-3">
+    <h1 class="text-light mb-3">Your Games</h1>
     <div class="row" *ngIf="games?.length">
       <div class="col-md-6 p-2" *ngFor="let game of games">
         <app-game-card [game]="game" [uid]="uid"></app-game-card>

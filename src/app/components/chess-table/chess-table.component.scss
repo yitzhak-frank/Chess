@@ -1,3 +1,5 @@
+@import '../../../styles.scss';
+
 table {
   box-shadow: 0 0 16px black;
   border: 25px solid rgb(82, 82, 82);
@@ -5,9 +7,27 @@ table {
   margin: 0 auto;
   box-sizing: border-box;
 
+  @include media-query(lg) {
+    border: 18px solid rgb(82, 82, 82);
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  @include media-query(sm) {
+    border: 12px solid rgb(82, 82, 82);
+  }
+
   td {
     text-align: center;
     font-size: 2.5rem;
+
+    @include media-query(lg) {
+      font-size: 1.7rem;
+    }
+
+    @include media-query(sm) {
+      font-size: 1.2rem;
+    }
 
     div {
       height: 60px;
@@ -15,6 +35,16 @@ table {
       display: flex;
       justify-content: center;
       align-items: center;
+
+      @include media-query(lg) {
+        width: 40px;
+        height: 40px;
+      }
+
+      @include media-query(sm) {
+        width: 32px;
+        height: 32px;
+      }
     }
 
     .selected {
@@ -31,10 +61,6 @@ table {
     width: 60px;
     background-color: rgba(111, 187, 109, 0.25);
   }
-}
-
-.test {
-  background-color: rgba(114, 71, 46, 0.25);
 }
 
 tr:nth-child(even) td:nth-child(even), tr:nth-child(odd) td:nth-child(odd) {

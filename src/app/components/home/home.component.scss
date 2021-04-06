@@ -1,3 +1,5 @@
+@import '../../../styles.scss';
+
 .home-body {
   position: fixed;
   top: 0;
@@ -19,11 +21,20 @@
     background-color: rgba(255,255 ,255, 0.2);
 
     .top {
-      padding-top: 100px;
+      padding-top: 75px;
+      padding-left: 10px;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
+
+      @include media-query(lg) {
+        padding-top: 200px;
+        justify-content: flex-start;
+      }
 
       .heading {
+        position: absolute;
+        top: 75px;
+        left: 10px;
         color: white;
 
         .heading-1 {
@@ -31,11 +42,19 @@
           font-size: 3rem;
           padding-left: 20px;
           font-family: 'Great Vibes', cursive;
+
+          @include media-query(sm) {
+            font-size: 2.5rem;
+          }
         }
 
         .heading-2 {
           font-family: fantasy;
           padding-left: 50px;
+
+          @include media-query(sm) {
+            font-size: 1.25rem;
+          }
         }
       }
 
@@ -52,6 +71,11 @@
       padding-right: 35px;
       justify-content: flex-end;
 
+      @include media-query(sm) {
+        padding-right: 0;
+        justify-content: center;
+      }
+
       .start-game {
         position: relative;
         transition: 1.5s;
@@ -61,6 +85,13 @@
         border-radius: 10px;
         background-color: rgba(0,0,0,0.3);
         padding: 25px;
+
+
+        @include media-query(sm) {
+          width: 300px;
+          padding: 10px;
+          padding-top: 20px;
+        }
 
         h1, p {
           color: white;
@@ -78,37 +109,10 @@
           margin-top: -15px;
         }
 
-        .copy-tooltip,
-        .copied-tooltip {
-          position: absolute;
-          bottom: 5px;
-          background-color: rgba(0,0,0,0.9);
-          z-index: 3;
-          color: white;
-          padding: 10px;
-          border-radius: 5px;
-          box-shadow: 0 0 16px gray;
-
-          &:before {
-            content:"";
-            position: absolute;
-            right: calc(50% - 8px);
-            top: 0;
-            width: 0;
-            height: 0;
-            border-top: 8px solid transparent;
-            border-right: 16px solid rgba(0,0,0,0.9);
-            border-bottom: 8px solid transparent;
-            transform: rotate(-27.5deg) translate(0, -13px);
-         }
-        }
-        .copy-tooltip {
-          display: none;
-          left: 150px;
-        }
-
-        .copied-tooltip {
-          left: 120px;
+        .app-copy-link {
+          margin: 20px 10px;
+          width: calc(100% - 20px);
+          height: 40px;
         }
 
         button {
@@ -128,36 +132,6 @@
             background-image: linear-gradient(to left, rgba(216, 166, 59, 1), rgba(200, 211, 212, 1));
             transform: scale(1.01);
             box-shadow: 2px 2px 8px gray;
-          }
-        }
-
-        input {
-          width: 100%;
-          border: none;
-          outline: none;
-          color: rgb(30, 30, 30);
-          text-shadow: 0 0 2px white;
-          height: 35px;
-          border-radius: 5px;
-          padding: 10px;
-          padding-left: 60px;
-          background-image: linear-gradient(to left, rgba(216, 166, 59, 0.7), rgba(200, 211, 212, 0.7));
-        }
-
-        strong {
-          display: block;
-          padding: 10px;
-          text-shadow: 0 0 12px black;
-          color: white;
-          transform: translate(0, -40px);
-
-          &:hover {
-            cursor: pointer;
-            transform: scale(1.1) translate(13px, -36px);
-          }
-
-          &:hover + .copy-tooltip {
-            display: block;
           }
         }
       }

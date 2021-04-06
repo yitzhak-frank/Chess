@@ -55,25 +55,15 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   connectToGame(): void {
-    if(!this.GameCreator.gameId) return this.createGame();
-    this.createGameLink();
-    this.Connection.connectToGame(this.user.uid);
-  }
-
-  createGame(): void {
-    this.GameCreator.createGame(this.user.uid, () => this.connectToGame());
+    this.GameCreator.createGame(this.user.uid, () => {
+      this.createGameLink();
+      this.Connection.connectToGame(this.user.uid);
+    });
   }
 
   disconnectFromGame(): void {
     this.deleteGameLink();
     this.Connection.disconnectFromGame(this.user.uid);
-  }
-
-  copyLink(input: HTMLInputElement): void {
-    input.select();
-    document.execCommand("copy");
-    this.copyTooltip = true;
-    setTimeout(() => this.copyTooltip = false, 2000);
   }
 
   goToGamesList(): void {

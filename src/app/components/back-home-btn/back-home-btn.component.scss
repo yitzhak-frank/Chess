@@ -1,0 +1,42 @@
+@import '../../../styles.scss';
+
+.buttons {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  display: flex;
+  color: white ;
+
+  @include media-query(sm) {
+    top: 5px;
+    left: 5px;
+  }
+
+  i {
+    height: 50px;
+    width: 50px;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 6px gray;
+    background-color: rgba(0,0,0,0.5);
+
+    &:hover {
+      cursor: pointer;
+      transform: scale(1.02);
+      box-shadow: 0 0 6px white;
+    }
+
+    @include media-query(sm) {
+      height: 35px;
+      width: 35px;
+      margin: 5px;
+      font-size: 19px;
+      border-radius: 7.5px;
+    }
+  }
+}
