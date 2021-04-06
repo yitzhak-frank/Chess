@@ -8,4 +8,10 @@
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
+
+  .row {
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-bottom: 50px;
+  }
 }

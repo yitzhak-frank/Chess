@@ -1,0 +1,9 @@
+<button *ngIf="!link; else gameLink" (click)="setLink()">Get Game Link</button>
+
+<ng-template #gameLink>
+  <input type="text" #input [value]="link">
+  <strong (click)="copyLink(input)">Copy</strong>
+</ng-template>
+
+<div class="copied-tooltip" *ngIf="copyTooltip">Copied to clipboard!</div>
+<div class="copy-tooltip" *ngIf="!copyTooltip">Click to copy</div>

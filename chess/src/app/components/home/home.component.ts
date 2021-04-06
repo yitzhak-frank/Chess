@@ -46,7 +46,7 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
     setTimeout(() => ids.forEach(id => document.getElementById(id).style.transform = 'translate(0)'), 1)
   }
 
-  createGameLink(): void {
+  private createGameLink() {
     this.link = `${url}/home?gameId=${this.GameCreator.gameId}`;
   }
 
@@ -55,20 +55,15 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   connectToGame(): void {
-    this.createGameLink();
-    this.Connection.connectToGame(this.user.uid);
+    this.GameCreator.createGame(this.user.uid, () => {
+      this.createGameLink();
+      this.Connection.connectToGame(this.user.uid);
+    });
   }
 
   disconnectFromGame(): void {
     this.deleteGameLink();
     this.Connection.disconnectFromGame(this.user.uid);
-  }
-
-  copyLink(input: HTMLInputElement): void {
-    input.select();
-    document.execCommand("copy");
-    this.copyTooltip = true;
-    setTimeout(() => this.copyTooltip = false, 2000);
   }
 
   goToGamesList(): void {

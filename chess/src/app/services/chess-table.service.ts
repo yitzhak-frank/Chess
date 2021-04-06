@@ -35,6 +35,9 @@ export class ChessTableService implements OnInit, OnDestroy {
     this.getGameData();
   }
 
+  /**
+   * Get the game data after rival move
+   */
   getGameData() {
     let {toolsPosition, toolsClasses, GameService, subscriptions, threatsMap, isChess} = this;
     let subscription = GameService.player2Move.subscribe((gameInfo) => {
@@ -62,12 +65,18 @@ export class ChessTableService implements OnInit, OnDestroy {
     subscriptions.push(subscription);
   }
 
+  /**
+   * @param playerColor Boolean indicate the player color - true = white and false = black.
+   */
   public onTableLoad(playerColor: boolean[]): void {
     this.playerColor = playerColor;
     this.setEdgeRowsPositions();
     for(let tool in this.toolsPosition) this.toolsClasses[tool] = new ToolsFactory(this.toolsPosition[tool]).class;
   }
 
+  /**
+   * @param position String with the position of the cell that pressed
+   */
   public emptyCellOnClick(position: string): void {
     let { castlingInfo, colorTurn, chessMatrix, possibleMoves, toolsPosition, toolsClasses, selectedTool, threatsMap } = this
     if(position === castlingInfo.right || position === castlingInfo.left) {
@@ -77,7 +86,9 @@ export class ChessTableService implements OnInit, OnDestroy {
       this.updateGameInfo();
     } else if(selectedTool) this.moveTool(position);
   }
-
+  /**
+   * @param toolInfo String with the info of the tool that pressed such as position color etc.
+   */
   public toolOnClick(toolInfo: ToolInfo): void {
     if((toolInfo.color != this.colorTurn || toolInfo.color != this.playerColor[0]) && !this.selectedTool) return;
     if(this.selectedTool && this.selectedTool.color != toolInfo.color) {
@@ -85,6 +96,9 @@ export class ChessTableService implements OnInit, OnDestroy {
     } else this.selectTool(toolInfo);
   }
 
+  /**
+   * @param toolInfo String with the info of the tool such as position color etc.
+   */
   private selectTool(toolInfo: ToolInfo): void {
     let { possibleMoves, toolsClasses, toolsPosition, selectedTool, threatsMap, castlingInfo ,colorTurn } = this;
     possibleMoves.splice(0, possibleMoves.length);
@@ -102,6 +116,10 @@ export class ChessTableService implements OnInit, OnDestroy {
       Castling.castlingManager(colorTurn, toolsPosition, toolsClasses, chessMatrix, possibleMoves, castlingInfo);
   }
 
+  /**
+   *
+   * @param position String with the new position for the tool.
+   */
   private moveTool(position: string): void {
     let {possibleMoves, toolsPosition, toolsClasses} = this;
     if(!possibleMoves.includes(position)) return this.notAllowedMove();
@@ -124,12 +142,20 @@ export class ChessTableService implements OnInit, OnDestroy {
     this.colorTurn = !this.colorTurn;
   }
 
+  /**
+   *
+   * @param colorTurn Boolean indicate the color turn - true = white and false = black.
+   */
   public updateGameInfo(colorTurn: boolean = this.colorTurn): void {
     let {threatsMap, gameInfo, deadTool, toolsClasses, toolsPosition} = this;
     this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
     this.GameService.updateGameInfo(colorTurn, threatsMap, gameInfo, deadTool, this.gameStatus);
   }
 
+  /**
+   * @param data Object contains old data to update.
+   * @param position String with the new position of the tool which is also the key in the data object.
+   */
   private updateDataToolMoved(data: object, position: string): void {
     data[position] = data[this.selectedTool.position];
     data[position].isVirgin = false;
@@ -142,6 +168,9 @@ export class ChessTableService implements OnInit, OnDestroy {
     delete this.selectedTool;
   }
 
+  /**
+   * @param tool Object contains the tool data such as position color etc.
+   */
   public coronation(tool: ToolInfo): void {
     this.toolsPosition[tool.position] = tool;
     this.toolsClasses[tool.position]  = new ToolsFactory(tool).class;
@@ -149,10 +178,18 @@ export class ChessTableService implements OnInit, OnDestroy {
     this.selectedTool = null;
   }
 
+  /**
+   * Checks if the last move is coronation.
+   * @param position String with the new position of the tool.
+   * @returns Boolean if it's coronation.
+   */
   private isCrowned(position: string): boolean {
     return this.selectedTool.rank === 'pawn' && this.edgeRowsPositins.includes(position);
   }
 
+  /**
+   * Sets the edge rows cells position for coronation chack
+   */
   private setEdgeRowsPositions(): void {
     this.chessMatrix.map(ar => this.edgeRowsPositins.push(...ar.filter((item, i) => i == 0 || i == 7)));
   }

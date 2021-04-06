@@ -21,7 +21,7 @@ export class UserStatusService {
     return firebase.default.database.ServerValue.TIMESTAMP;
   }
 
-  getUser() {
+  private getUser() {
     return this.afa.authState.pipe(first()).toPromise();
   }
 
@@ -30,7 +30,7 @@ export class UserStatusService {
     if (user) return this.db.object(`status/${user.uid}`).update({ status, timestamp: this.timestamp });
   }
 
-  updateOnConnect() {
+  private updateOnConnect() {
     const connection = this.db.object('.info/connected').valueChanges()
     .pipe(map(connected => connected ? 'online' : 'offline'));
 
@@ -41,22 +41,21 @@ export class UserStatusService {
     );
   }
 
-  updateOnDisconnect() {
+  private updateOnDisconnect() {
     return this.afa.authState.pipe(
       shareReplay(1),
       tap(user => {
         if (!user) return;
-        this.db.object(`status/${user.uid}`).query.ref.onDisconnect()
-        .update({status: 'offline', timestamp: this.timestamp});
+        this.db.object(`status/${user.uid}`).query.ref.onDisconnect().update({status: 'offline', timestamp: this.timestamp});
       })
     );
   }
 
-  updateUserStatus(uid: string, status: string) {
+  public updateUserStatus(uid: string, status: string) {
     this.db.object(`status/${uid}`).update({status, timestamp: this.timestamp})
   }
 
-  listenToUserStatus(uid: string) {
+  public listenToUserStatus(uid: string) {
     return this.db.object(`status/${uid}`).valueChanges();
   }
 }

@@ -29,7 +29,7 @@ export class ConnectionListenerService implements OnDestroy {
     return localStorage['chess-game-id'];
   }
 
-  startListening(uid: string): void {
+  public startListening(uid: string): void {
     if(!this.gameId || this.isListening) return;
 
     let sub = this.fbs.getGameConnectionByGameId(this.gameId).valueChanges().pipe(shareReplay(1)).subscribe((data: object[]) => {
@@ -44,10 +44,15 @@ export class ConnectionListenerService implements OnDestroy {
       }
     });
     this.isListening = true;
-    this.subscriptions.push(sub);
+    this.subscriptions[0] = sub;
   }
 
-  listenToUserStatus(uid: string): void {
+  public stopListening(): void {
+    this.subscriptions[0].unsubscribe();
+    this.isListening = false;
+  }
+
+  public listenToUserStatus(uid: string): void {
     let subscription = this.UserStatus.listenToUserStatus(uid).subscribe(({status}) => {
       if(status === 'offline') {
         this.statusTimeoutId = setTimeout(() => this.disconnectFromGame(uid), 1000 * 65);
@@ -56,18 +61,18 @@ export class ConnectionListenerService implements OnDestroy {
         this.connectToGame(uid);
       }
     });
-    this.subscriptions.push(subscription);
+    this.subscriptions[1] = subscription;
   }
 
-  connectToGame(uid: string): void {
+  public connectToGame(uid: string): void {
     this.fbs.updateGameConnectionByGameId({[uid]: true}, this.gameId);
   }
 
-  disconnectFromGame(uid: string): void {
+  public disconnectFromGame(uid: string): void {
     this.fbs.updateGameConnectionByGameId({[uid]: false}, this.gameId);
   }
 
-  joinPlayersToGame(uid: string): void {
+  public joinPlayersToGame(uid: string): void {
     this.waiterFlag.emit(false)
     this.Router.navigate(['/chess'], { queryParams: { gameId: this.gameId, uid } });
   }

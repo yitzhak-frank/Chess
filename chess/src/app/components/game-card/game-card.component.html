@@ -1,61 +1,14 @@
 <div class="game">
-  <div class="game-info text-info">
-    <h6><span class="text-primary">Game status:</span> {{gameInfo?.status}}</h6>
-    <h6><span class="text-primary">Start date:</span> {{gameInfo?.startDate | date : 'dd / MM / YYYY'}}</h6>
-    <h6><span class="text-primary">Last date:</span> {{gameInfo?.lastDate | date : 'dd / MM / YYYY'}}</h6>
-    <h6><span class="text-primary">Time played:</span> {{gameInfo?.time}}</h6>
-    <h6><span class="text-primary">moves:</span> {{gameInfo?.moves}}</h6>
-  </div>
   <div class="players">
-    <div class="player white-player">
-      <div class="user-details white-user-details">
-        <img class="user-img" [src]="whitePlayerInfo?.image" alt="user" referrerpolicy="no-referrer">
-      </div>
-      <h6 class="player-name text-center mt-2">{{whitePlayerInfo?.name}}</h6>
-      <div class="player-game-info">
-        <div class="border"></div>
-        <h6
-          [ngClass]="{'text-danger': timeIndex === -1, 'text-success': timeIndex === 1, 'text-info': timeIndex === 0}"
-        > {{whitePlayerInfo?.time}}</h6>
-        <div class="border"></div>
-        <h6
-          [ngClass]="{
-            'text-danger': whitePlayerInfo?.score > blackPlayerInfo?.score,
-            'text-success': whitePlayerInfo?.score < blackPlayerInfo?.score,
-            'text-info': whitePlayerInfo?.score === blackPlayerInfo?.score
-          }"
-        > -{{whitePlayerInfo?.score}}</h6>
-        <div class="border"></div>
-      </div>
+    <div class="user-details white-user-details">
+      <img class="user-img" [src]="whitePlayer?.photoURL" alt="user" referrerpolicy="no-referrer">
+      <h6 class="player-name text-center mt-2">{{whitePlayer?.displayName}}</h6>
     </div>
-    <div class="headings text-center">
-      <div class="border"></div>
-      <h6><span class="text-primary">Time played</span></h6>
-      <div class="border"></div>
-      <h6><span class="text-primary">Kills score</span></h6>
-      <div class="border"></div>
-    </div>
-    <div class="player black-player">
-      <div class="user-details black-user-details">
-        <img class="user-img" [src]="blackPlayerInfo?.image" alt="user" referrerpolicy="no-referrer">
-      </div>
-      <h6 class="player-name text-center mt-2">{{blackPlayerInfo?.name}}</h6>
-      <div class="player-game-info">
-        <div class="border"></div>
-        <h6
-          [ngClass]="{'text-danger': timeIndex === 1, 'text-success': timeIndex === -1, 'text-info': timeIndex === 0}"
-        > {{blackPlayerInfo?.time}}</h6>
-        <div class="border"></div>
-        <h6
-          [ngClass]="{
-            'text-danger': whitePlayerInfo?.score < blackPlayerInfo?.score,
-            'text-success': whitePlayerInfo?.score > blackPlayerInfo?.score,
-            'text-info': whitePlayerInfo?.score === blackPlayerInfo?.score
-          }"
-        > -{{blackPlayerInfo?.score}}</h6>
-        <div class="border"></div>
-      </div>
+    <h1>VS</h1>
+    <div class="user-details black-user-details">
+      <img class="user-img" [src]="blackPlayer?.photoURL" alt="user" referrerpolicy="no-referrer">
+      <h6 class="player-name text-center mt-2">{{blackPlayer?.displayName}}</h6>
     </div>
   </div>
-  <button >Get Game Link</button>
+  <button (click)="showGameDetails()">Game Info</button>
 </div>

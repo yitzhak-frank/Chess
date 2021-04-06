@@ -36,7 +36,7 @@ class Pawn extends Tool {
   }
 
   /**
-   * Calcs the optionals straight moves for the pawn
+   * Calcs the optional straight moves for the pawn
    * @param direction 1 or -1 use for the direction by add it to the metrix index
    */
   private calcPossibleMovesStraight(direction: number): void {
@@ -49,7 +49,7 @@ class Pawn extends Tool {
   /**
    * Calcs the slant moves for the pawn
    * @param direction 1 or -1 use for the direction by add it to the metrix index
-   * @param check Function that checks the possible moves or the threth map and adds it to their prop
+   * @param check Function that checks the possible moves or the threth map adds it to their prop and returns true to stop checking
    */
   private calcToolsToEat(direction: number, check: (currentCell: string) => void): void {
     if(this.chessMatrix[this.index[0] + (direction * -1)])

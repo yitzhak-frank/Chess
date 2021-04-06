@@ -8,8 +8,8 @@ class Rook extends Tool {
   }
 
   /**
-   * Calcs the optionls moves for the tool
-   * @param check Function that checks the possible moves or the threth map and adds it to their prop
+   * Calcs the optionl moves for the tool
+   * @param check Function that checks the possible moves or the threth map adds it to their prop and returns true to stop checking
    */
   public calcPossibleMoves(check: (currentCell: string) => boolean | void): void {
     this.setIndex();

@@ -1,5 +1,5 @@
+<app-waiter (close)="disconnectFromGame()"></app-waiter>
 <div class="home-body" (click)="showLogin()">
-  <app-waiter (close)="disconnectFromGame()"></app-waiter>
   <div class="home-body-cover">
     <div class="top">
       <span class="heading">
@@ -15,20 +15,14 @@
         <h1>Start Play</h1>
         <p>Hello {{userName}} :)</p>
         <p>
-          To start a new game click the "Get New Game Link" button, then
+          To start a new game click the "Get Game Link" button, then
           copy the link, send it to your game partner and start playing
         </p>
 
         <button (click)="goToGamesList()">Go To Games List</button>
-        <button *ngIf="!link; else gameLink" (click)="connectToGame()">Get New Game Link</button>
-
-        <ng-template #gameLink>
-          <input type="text" #input [value]="link">
-          <strong (click)="copyLink(input)">Copy</strong>
-        </ng-template>
-
-        <div class="copied-tooltip" *ngIf="copyTooltip">Copied to clipboard!</div>
-        <div class="copy-tooltip" *ngIf="!copyTooltip">Click to copy</div>
+        <div class="app-copy-link">
+          <app-copy-link [link]="link" (getLink)="connectToGame()"></app-copy-link>
+        </div>
       </div>
     </div>
   </div>

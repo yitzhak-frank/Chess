@@ -10,32 +10,31 @@ import { UserStatusService } from './user-status.service';
 })
 export class AuthService {
 
-  user$: Observable<firebase.User> = null;
-  user: firebase.User = null;
-  isLogged: boolean = false;
+  public user$: Observable<firebase.User> = null;
+  public user: firebase.User = null;
 
   constructor(private afa: AngularFireAuth, private UserStatus: UserStatusService) {
     this.user$ = this.getUserId();
     this.user$.subscribe(user => this.user = user);
   }
 
-  getUserId() {
+  private getUserId(): Observable<firebase.User> {
     return this.afa.authState;
   }
 
-  signup(email: string, password: string) {
+  public signup(email: string, password: string) {
     return this.afa.createUserWithEmailAndPassword(email, password);
   }
 
-  login(email: string, password: string) {
+  public login(email: string, password: string) {
     return this.afa.signInWithEmailAndPassword(email, password);
   }
 
-  googleLogin() {
+  public googleLogin() {
     return this.afa.signInWithPopup(new firebase.auth.GoogleAuthProvider());
   }
 
-  logOut() {
+  public logOut() {
     this.UserStatus.updateUserStatus(this.user.uid, 'offline');
     return this.afa.signOut();
   }

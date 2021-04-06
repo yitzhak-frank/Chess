@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from 'src/app/services/auth.service';
-import firebase from 'firebase/app';
-import { FierbaseService } from 'src/app/services/firebase.service';
-import { take, tap } from 'rxjs/operators';
-import { Game } from 'src/app/interfaces/game-interfaces';
-import { Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { FierbaseService } from 'src/app/services/firebase.service';
+import { switchMap, take } from 'rxjs/operators';
+import { AuthService } from 'src/app/services/auth.service';
+import { Observable } from 'rxjs';
+import firebase from 'firebase/app';
+import { ConnectionListenerService } from 'src/app/services/connection.service';
 
 @Component({
   selector: 'app-games-list',
@@ -15,16 +15,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class GamesListComponent implements OnInit {
 
   public user$: Observable<firebase.User>;
-  public games //: Game[];
+  public games = [];
   public uid: string;
 
   constructor(
     private Auth:   AuthService,
     private fbs:    FierbaseService,
     private Route:  ActivatedRoute,
-    private Router: Router
+    private Router: Router,
+    private Connection: ConnectionListenerService
   ) {
     this.user$ = Auth.user$;
+  }
+
+  disconnectFromGame(): void {
+    this.Connection.disconnectFromGame(this.uid);
   }
 
   ngOnInit(): void {
@@ -34,10 +39,13 @@ export class GamesListComponent implements OnInit {
 
       this.uid = params.uid;
 
-      this.fbs.gatUserGames(params.uid)
-      .valueChanges({idField: 'id'})
-      .pipe(take(1))
-      .subscribe(games => this.games = games.filter(game => game['black_uid']));
+      this.fbs.gatUserGames('white_uid', params.uid).valueChanges({idField: 'id'}).pipe(
+        take(2),
+        switchMap(games => {
+          this.games.push(...games.filter(game => game['black_uid']));
+          return this.fbs.gatUserGames('black_uid', params.uid).valueChanges({idField: 'id'})
+        })
+      ).subscribe(games => this.games.push(...games));
     });
   }
 }

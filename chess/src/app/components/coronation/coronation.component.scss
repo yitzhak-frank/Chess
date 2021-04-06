@@ -1,4 +1,6 @@
-.container {
+@import '../../../styles.scss';
+
+.coronation {
   position: fixed;
   top: 0; left: 0; bottom: 0; right: 0;
   z-index: 3;
@@ -19,6 +21,13 @@
     border-radius: 20px;
     box-shadow: 2px 2px 8px black;
 
+    @include media-query(sm) {
+      width: 300px;
+      padding: 10px;
+      font-size: 2.3rem;
+      border-radius: 17px;
+    }
+
     .option {
       cursor: pointer;
       height: 100px;
@@ -31,6 +40,12 @@
       background-color: #bbb;
       box-shadow: 2px 2px 8px black;
       transition: 0.5s;
+
+      @include media-query(sm) {
+        height: 60px;
+        margin: 10px;
+        border-radius: 10px;
+      }
 
       &:hover {
         transform: scale(1.1);
