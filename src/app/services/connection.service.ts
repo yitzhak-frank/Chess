@@ -30,7 +30,8 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   public startListening(uid: string): void {
-    if(!this.gameId || this.isListening) return;
+    if(!this.gameId) return;
+    if(this.isListening) this.subscriptions[0].unsubscribe();
 
     let sub = this.fbs.getGameConnectionByGameId(this.gameId).valueChanges().pipe(shareReplay(1)).subscribe((data: object[]) => {
       let [connection] = data;
@@ -55,9 +56,10 @@ export class ConnectionListenerService implements OnDestroy {
   public listenToUserStatus(uid: string): void {
     let subscription = this.UserStatus.listenToUserStatus(uid).subscribe(({status}) => {
       if(status === 'offline') {
-        this.statusTimeoutId = setTimeout(() => this.disconnectFromGame(uid), 1000 * 65);
+        if(!this.statusTimeoutId) this.statusTimeoutId = setTimeout(() => this.disconnectFromGame(uid), 1000 * 65);
       } else if(this.statusTimeoutId) {
         clearTimeout(this.statusTimeoutId);
+        this.statusTimeoutId = null
         this.connectToGame(uid);
       }
     });

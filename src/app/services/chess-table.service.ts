@@ -17,7 +17,7 @@ export class ChessTableService implements OnInit, OnDestroy {
   private chessMatrix:      Array<Array<string>> = chessMatrix;
   private toolsPosition:    object   = firstPosition;
   private toolsClasses:     object   = {};
-  private playerColor:      boolean[];
+  public  playerColor:      boolean[];
   public  colorTurn:        boolean  = true;
   private selectedTool:     ToolInfo;
   public  possibleMoves:    string[] = [];
@@ -104,8 +104,8 @@ export class ChessTableService implements OnInit, OnDestroy {
     possibleMoves.splice(0, possibleMoves.length);
     possibleMoves.push(...toolsClasses[toolInfo.position].getPossibleMoves());
 
-    if(selectedTool) toolsPosition[selectedTool.position].selected  = false;
-    if(possibleMoves.length) toolsPosition[toolInfo.position].selected   = true;
+    if(selectedTool) toolsPosition[selectedTool.position].selected     = false;
+    if(possibleMoves.length) toolsPosition[toolInfo.position].selected = true;
 
     this.selectedTool = toolInfo;
 
@@ -198,6 +198,43 @@ export class ChessTableService implements OnInit, OnDestroy {
 
   public getCoronationInfo(): object { return this.coronationInfo }
 
+  public dragAndDrop({target: {parentNode :element}}, color: boolean) {
+
+    if(color !== this.playerColor[0] || color !== this.colorTurn) return;
+
+    const startDragElement = (e) => {
+      e.preventDefault();
+      document.onmouseup = stopDragElement;
+      document.onmousemove = dragElement;
+    }
+
+    const dragElement = (e) => {
+      e.preventDefault();
+      element.style.position = 'fixed';
+      element.style.top  = (e.y - (element.clientHeight/2)) + "px";
+      element.style.left = (e.x - (element.clientWidth/2))  + "px";
+      element.style.textShadow = '2px 2px 16px #444'
+    }
+
+    const stopDragElement = (e) => {
+      element.style = {...element.style, position: '', top: '', left: ''};
+      document.onmouseup = null;
+      document.onmousemove = null;
+      dropElement(e);
+    }
+
+    const dropElement = ({x, y}) => {
+      const target  = document.elementFromPoint(x, y);
+      const myEvent = new MouseEvent('drop');
+      const click   = function() {this.click()};
+
+      target.addEventListener('drop', click);
+      target.dispatchEvent(myEvent);
+      target.removeEventListener('drop', click);
+    }
+
+    element.onmousedown = startDragElement;
+  }
 
   ngOnInit(): void {}
 

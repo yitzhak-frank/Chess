@@ -11,14 +11,14 @@ import { ChessTableService } from 'src/app/services/chess-table.service';
 })
 export class ChessTableComponent implements OnInit {
 
-  public rows:           number[] = rows;
-  public cols:           string[] = cols;
-  public toolsPosition:  object   = firstPosition;
-  public possibleMoves:  string[] = [];
+  @Input() playerColor:  boolean[] = [];
+  public rows:           number[]  = rows;
+  public cols:           string[]  = cols;
+  public possibleMoves:  string[]  = [];
+  public toolsPosition:  object    = firstPosition;
   public isChess:        object;
   public colorTurn:      boolean;
   public coronationInfo: any;
-  @Input() playerColor:  boolean[];
 
   constructor(private tableService: ChessTableService) {
     this.possibleMoves  = tableService.possibleMoves;

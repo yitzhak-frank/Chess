@@ -7,7 +7,7 @@
   border-radius: 10px;
   max-width: 300px;
 
-  @include media-query(lg) {
+  @include media-query(md) {
     max-width: 450px;
     display: flex;
     align-items: center;
@@ -33,7 +33,7 @@
       border-radius: 50%;
       border: 3px solid white;
 
-      @include media-query(lg) {
+      @include media-query(md) {
         margin-top: 10px;
       }
     }
@@ -53,13 +53,13 @@
 
   .kills {
 
-    @include media-query(lg) {
+    @include media-query(md) {
       min-width: 125px;
     }
 
     .dead-tools {
 
-      @include media-query(lg) {
+      @include media-query(md) {
         max-height: 100px;
         overflow-y: auto;
       }
@@ -80,7 +80,7 @@
 .score {
   min-width: 100px;
 
-  @include media-query(lg) {
+  @include media-query(md) {
     min-width: 130px;
     padding-right: 30px;
   }

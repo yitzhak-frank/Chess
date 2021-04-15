@@ -3,11 +3,11 @@
 <div class="game-details">
   <div class="game-info text-light" *ngIf="gameInfo">
 
-    <h6><span class="text-warning">Game Status:</span> {{gameInfo.status}}</h6>
-    <h6><span class="text-warning">Start Date:</span> {{gameInfo.startDate | date : 'dd / MM / YYYY'}}</h6>
-    <h6><span class="text-warning">Last Date:</span> {{gameInfo.lastDate | date : 'dd / MM / YYYY'}}</h6>
-    <h6><span class="text-warning">Time Played:</span> {{gameInfo.time}}</h6>
-    <h6><span class="text-warning">Moves:</span> {{gameInfo.moves}}</h6>
+    <h6><span class="text-warning mr-2">Game Status:</span> {{gameInfo.status}}</h6>
+    <h6><span class="text-warning mr-2">Start Date:</span> {{gameInfo.startDate | date : 'dd / MM / YYYY'}}</h6>
+    <h6><span class="text-warning mr-2">Last Date:</span> {{gameInfo.lastDate | date : 'dd / MM / YYYY'}}</h6>
+    <h6><span class="text-warning mr-2">Time Played:</span> {{gameInfo.time}}</h6>
+    <h6><span class="text-warning mr-2">Moves:</span> {{gameInfo.moves}}</h6>
 
     <div class="app-copy-link" *ngIf="gameInfo.status === 'Active game'">
       <app-copy-link [link]="link" (getLink)="connectToGame()"></app-copy-link>
@@ -15,6 +15,7 @@
   </div>
 
   <div class="table-and-players">
+
     <app-player
       *ngIf="blackPlayerInfo"
       [name]="blackPlayerInfo.name"
@@ -23,7 +24,9 @@
       [time]="blackPlayerInfo.time"
       [deadTools]="blackPlayerInfo.deadTools"
     ></app-player>
-    <div class="e2e-inner-html-bound chess-table" [innerHTML]="gameInfo?.chessTable"></div>
+
+    <div class="e2e-inner-html-bound chess-table" [innerHTML]="htmlEntities(gameInfo?.chessTable)"></div>
+
     <app-player
       *ngIf="whitePlayerInfo"
       [name]="whitePlayerInfo.name"
@@ -32,5 +35,6 @@
       [time]="whitePlayerInfo.time"
       [deadTools]="whitePlayerInfo.deadTools"
     ></app-player>
+
   </div>
 </div>

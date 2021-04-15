@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
 import { shareReplay, take } from 'rxjs/operators';
 import { Game, GameInfo } from '../interfaces/game-interfaces';
 

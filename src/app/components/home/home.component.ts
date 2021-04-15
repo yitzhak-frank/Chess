@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConnectionListenerService } from 'src/app/services/connection.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameCreatorService } from 'src/app/services/game-creator.service';
@@ -12,7 +12,7 @@ import firebase from 'firebase/app';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit, OnChanges, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy {
 
   userName: string  = '';
   link:     string  = '';
@@ -84,7 +84,8 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
         this.user = user;
         this.userName = user?.displayName;
         if(!this.params) this.GameCreator.setPlayerColor(true);
-        if(user) this.GameCreator.joinToGame();
+        if(user) this.GameCreator.joinToGame(user.uid);
+        this.Connection.startListening(user.uid);
       })
     );
   }

@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "status": {
+      "$uid": {
+        ".validate": "newData.hasChildren(['status', 'timestamp'])",
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    }
+  }
+}

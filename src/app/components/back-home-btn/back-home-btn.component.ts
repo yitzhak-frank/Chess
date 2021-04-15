@@ -20,7 +20,7 @@ export class BackHomeBtnComponent implements OnInit {
 
   goBack(): void {
     if(location.pathname.includes('chess')) this.leavePage.emit('Back');
-    else this.Location.back();
+    else this.Router.navigate(['..']);
   }
 
   goHome(): void {

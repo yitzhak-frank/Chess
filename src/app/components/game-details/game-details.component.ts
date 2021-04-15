@@ -75,7 +75,7 @@ export class GameDetailsComponent implements OnInit {
 
   createGameLink(): void {
     this.setGameId(this.params.gameId);
-    this.link = `${url}/chess?gmaeId=${this.gameId}&uid=${this.player2uid}`
+    this.link = `${url}/chess?gameId=${this.gameId}&uid=${this.player2uid}`
   }
 
   deleteGameLink(): void {
@@ -84,6 +84,7 @@ export class GameDetailsComponent implements OnInit {
 
   connectToGame(): void {
     this.createGameLink();
+    this.Connection.startListening(this.params.uid);
     this.Connection.connectToGame(this.params.uid);
   }
 
@@ -92,16 +93,17 @@ export class GameDetailsComponent implements OnInit {
     this.Connection.disconnectFromGame(this.params.uid);
   }
 
+  htmlEntities(str: string): string {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   ngOnInit(): void {
     this.params = this.Route.snapshot.queryParams;
     if(!this.params.gameId || !this.params.uid) {
       this.Router.navigate(['/home']);
       return;
-    } else this.Auth.user$.pipe(take(1)).subscribe(user => {
-      if(user.uid !== this.params.uid) this.Router.navigate(['/home']);
-    })
-    this.fbs.getGameById(this.params.gameId).pipe(take(1)).toPromise().then(game => this.game = game)
-    .then(() => {
+    }
+    this.fbs.getGameById(this.params.gameId).pipe(take(1)).toPromise().then(game => this.game = game).then(() => {
       if(this.game['black_uid'] !== this.params.uid && this.game['white_uid'] !== this.params.uid)
         return this.Router.navigate(['/home']);
 
@@ -119,7 +121,8 @@ export class GameDetailsComponent implements OnInit {
         this.setPlayerInfo('blackPlayerInfo', blackUser.displayName, blackUser.photoURL, black_time, black_dead_tools)
         this.setPlayerInfo('whitePlayerInfo', whiteUser.displayName, whiteUser.photoURL, white_time, white_dead_tools)
       });
-    })
+    });
+    this.Connection.startListening(this.params.uid);
   }
 
 }

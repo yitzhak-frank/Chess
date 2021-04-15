@@ -70,7 +70,3 @@ tr:nth-child(even) td:nth-child(even), tr:nth-child(odd) td:nth-child(odd) {
 tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
   background: rgba(255, 255, 255, 0.95);
 }
-
-table.white {
-  transform: rotate(180deg);
-}

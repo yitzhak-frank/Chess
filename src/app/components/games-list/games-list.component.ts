@@ -47,5 +47,6 @@ export class GamesListComponent implements OnInit {
         })
       ).subscribe(games => this.games.push(...games));
     });
+    this.Connection.startListening(this.uid);
   }
 }

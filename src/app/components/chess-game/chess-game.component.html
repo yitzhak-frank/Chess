@@ -1,7 +1,17 @@
 <app-back-home-btn (leavePage)="leavePage($event)"></app-back-home-btn>
 <app-waiter (close)="exitGame('Home')"></app-waiter>
 <div class="container-fluid">
+
+  <div class="game-info mx-auto text-center text-light">
+    <div class="d-flex align-items-center justify-content-center mb-3 mt-5 mx-auto">
+      <h6 class="text-warning mr-3 ">Time Played:</h6>
+      <app-time-counter [startTime]="ChessTable.gameInfo?.game_time" [color]="ChessTable.colorTurn"></app-time-counter>
+    </div>
+    <h6><span class="text-warning mr-3">Moves:</span> {{ChessTable.gameInfo?.moves}}</h6>
+  </div>
+
   <div class="table-and-players">
+
     <app-player
       [name]="blackUser?.displayName"
       [image]="blackUser?.photoURL"
@@ -9,7 +19,9 @@
       [counter]="timeCounters?.blackTime"
       [deadTools]="deadTools?.black"
     ></app-player>
+
     <app-chess-table [playerColor]="playerColor"></app-chess-table>
+
     <app-player
       [name]="whiteUser?.displayName"
       [image]="whiteUser?.photoURL"
@@ -17,5 +29,6 @@
       [counter]="timeCounters?.whiteTime"
       [deadTools]="deadTools?.white"
     ></app-player>
+
   </div>
 </div>
