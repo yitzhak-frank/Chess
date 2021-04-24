@@ -1,27 +1,30 @@
-import { Component, HostListener, OnInit } from '@angular/core';
-import { ConnectionListenerService } from 'src/app/services/connection.service';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChessTableService } from 'src/app/services/chess-table.service';
+import { ConnectionService } from 'src/app/services/connection.service';
 import { FierbaseService } from 'src/app/services/firebase.service';
 import { LeavePageGuard } from '../../guards/leave-page.guard';
 import { TimeCounters } from 'src/app/interfaces/game-interfaces';
-import { AuthService } from 'src/app/services/auth.service';
 import { GameService } from 'src/app/services/game.service';
 import { cols, rows } from 'src/app/data/tableArrays';
-import { Location } from '@angular/common';
 import { take } from 'rxjs/operators';
 import firebase from 'firebase/app';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-chess-game',
   templateUrl: './chess-game.component.html',
   styleUrls: ['./chess-game.component.scss']
 })
-export class ChessGameComponent implements OnInit, LeavePageGuard {
+export class ChessGameComponent implements OnInit, OnDestroy, LeavePageGuard {
   @HostListener('window:beforeunload')
-
   canDeactivate(): boolean {
     return this.doLeavePage;
+  }
+
+  @HostListener('window:unload', ['$event'])
+  whenDeactivate(): void {
+    this.Connection.disconnectFromGame(this.uid);
   }
 
   public  playerColor:   boolean[] = [];
@@ -31,7 +34,12 @@ export class ChessGameComponent implements OnInit, LeavePageGuard {
   private gameId:        string;
   private uid:           string;
   private player2Uid:    string;
-  private doLeavePage:   boolean;
+  public  gameStatus:    string;
+  public  winnerName:    string;
+  private colorTorn:     boolean;
+  public  isActive:      boolean = true;
+  private doLeavePage:   boolean = false;
+  private subscription:  Subscription;
   public  deadTools:     { black: string[]; white: string[]; };
 
   constructor(
@@ -39,9 +47,7 @@ export class ChessGameComponent implements OnInit, LeavePageGuard {
     private fbs:         FierbaseService,
     private GameService: GameService,
     private Router:      Router,
-    private Connection:  ConnectionListenerService,
-    private Auth:        AuthService,
-    private Location:    Location,
+    private Connection:  ConnectionService,
     public  ChessTable:  ChessTableService
   ) {
     this.timeCounters = GameService.timeCounters;
@@ -52,21 +58,36 @@ export class ChessGameComponent implements OnInit, LeavePageGuard {
     localStorage['chess-game-id'] = gameId;
   }
 
-  leavePage(e): void {
+  setWinnerName(): string {
+    if(!this.gameStatus.endsWith('Won')) return '';
+    if(this.colorTorn === this.playerColor[0]) {
+      this.winnerName = this.playerColor[0] ? this.blackUser.displayName : this.whiteUser.displayName;
+    } else this.winnerName = this.playerColor[0] ? this.whiteUser.displayName : this.blackUser.displayName;
+  }
+
+  setGameStatus(): void {
+    this.subscription = this.GameService.player2Move.subscribe(({game_status, color_turn}) => {
+      this.timeCounters = this.GameService.timeCounters;
+      this.isActive     = game_status.startsWith('Active') ? true : false;
+      this.gameStatus   = game_status;
+      this.colorTorn    = color_turn;
+      this.setWinnerName();
+    })
+  }
+
+  leavePage(path: string): void {
     if(!confirm('Are you sure that you want to leave the game?')) return;
-    this.doLeavePage = true;
-    this.exitGame(e);
+    this.exitGame(path);
   }
 
   exitGame(path: string): void {
-    this.Connection.disconnectFromGame(this.uid);
-    if(path === 'Home') this.Router.navigate(['/home']);
-    else this.Router.navigate(['..']);
+    if(this.gameId) this.Connection.disconnectFromGame(this.uid);
+    this.doLeavePage = true;
+    this.Router.navigate([path]);
   }
 
   ngOnInit(): void {
-
-    this.Route.queryParams.pipe(take(1)).subscribe(params => {
+    this.Route.queryParams.pipe(take(2)).subscribe(params => {
 
       if(!params.gameId || !params.uid) return this.Router.navigate(['/home']);
 
@@ -96,6 +117,11 @@ export class ChessGameComponent implements OnInit, LeavePageGuard {
         this.Connection.listenToUserStatus(this.player2Uid);
       });
     });
+
+    this.setGameStatus();
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 }

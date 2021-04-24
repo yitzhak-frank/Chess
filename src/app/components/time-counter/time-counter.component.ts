@@ -8,6 +8,7 @@ import { ChessTableService } from 'src/app/services/chess-table.service';
 })
 export class TimeCounterComponent implements OnInit, OnChanges, OnDestroy {
 
+  @Input() isActive:  boolean;
   @Input() startTime: number;
   @Input() color:     boolean;
   private  active:    boolean;
@@ -24,7 +25,7 @@ export class TimeCounterComponent implements OnInit, OnChanges, OnDestroy {
     this.active = this.ChessTable.colorTurn === this.color;
     this.intervalId = setInterval(() => {
       this.active = this.ChessTable.colorTurn === this.color;
-      if(!this.active) return;
+      if(!this.active || !this.isActive) return;
       this.startTime += 1
       this.setTimeCount();
     }, 1000);

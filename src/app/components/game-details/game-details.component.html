@@ -3,7 +3,7 @@
 <div class="game-details">
   <div class="game-info text-light" *ngIf="gameInfo">
 
-    <h6><span class="text-warning mr-2">Game Status:</span> {{gameInfo.status}}</h6>
+    <h6><span class="text-warning mr-2">Game Status:</span> {{gameStatus}}</h6>
     <h6><span class="text-warning mr-2">Start Date:</span> {{gameInfo.startDate | date : 'dd / MM / YYYY'}}</h6>
     <h6><span class="text-warning mr-2">Last Date:</span> {{gameInfo.lastDate | date : 'dd / MM / YYYY'}}</h6>
     <h6><span class="text-warning mr-2">Time Played:</span> {{gameInfo.time}}</h6>
@@ -25,7 +25,7 @@
       [deadTools]="blackPlayerInfo.deadTools"
     ></app-player>
 
-    <div class="e2e-inner-html-bound chess-table" [innerHTML]="htmlEntities(gameInfo?.chessTable)"></div>
+    <div class="e2e-inner-html-bound chess-table" [innerHTML]="gameInfo?.chessTable"></div>
 
     <app-player
       *ngIf="whitePlayerInfo"

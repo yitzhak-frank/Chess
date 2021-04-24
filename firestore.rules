@@ -9,7 +9,7 @@ service cloud.firestore {
       	&& request.resource.data.keys().hasOnly(['white_uid', 'white_user', 'black_uid', 'black_user']);
 
       allow read, update: if request.auth != null
-      	&& ((request.auth.uid in resource.data.values()) || resource.data.black_uid == '');
+      	&& (request.auth.uid in resource.data.values() || resource.data.black_uid == '');
 
     	allow delete: if false;
 
@@ -21,7 +21,7 @@ service cloud.firestore {
       	&& request.resource.data.keys().hasAll([request.auth.uid, 'game_id']);
 
       allow read, update: if request.auth != null
-      	&& (request.auth.uid in resource.data.keys()) || (request.auth.uid in get(/databases/$(database)/documents/games/$(resource.data.game_id)).data.values());
+      	&& (request.auth.uid in resource.data.keys() || request.auth.uid in get(/databases/$(database)/documents/games/$(request.resource.data.game_id)).data.values());
 
       allow delete: if request.auth != null
       	&& request.auth.uid in resource.data.keys()
@@ -40,5 +40,5 @@ service cloud.firestore {
       allow delete: if false;
 
     }
-  }
+   }
 }

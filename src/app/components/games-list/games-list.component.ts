@@ -5,7 +5,7 @@ import { switchMap, take } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable } from 'rxjs';
 import firebase from 'firebase/app';
-import { ConnectionListenerService } from 'src/app/services/connection.service';
+import { ConnectionService } from 'src/app/services/connection.service';
 
 @Component({
   selector: 'app-games-list',
@@ -23,7 +23,7 @@ export class GamesListComponent implements OnInit {
     private fbs:    FierbaseService,
     private Route:  ActivatedRoute,
     private Router: Router,
-    private Connection: ConnectionListenerService
+    private Connection: ConnectionService
   ) {
     this.user$ = Auth.user$;
   }

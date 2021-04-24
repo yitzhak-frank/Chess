@@ -7,7 +7,12 @@
 
   <div class="time-played ">
     <h6 class="text-center mt-3">Time Played</h6>
-    <app-time-counter *ngIf="counter; else timeCount" [startTime]="counter" [color]="color"></app-time-counter>
+    <app-time-counter
+      *ngIf="counter || counter === 0; else timeCount"
+      [startTime]="counter"
+      [color]="color"
+      [isActive]="isActive"
+    ></app-time-counter>
     <ng-template #timeCount>
       <div class="time-count">{{time}}</div>
     </ng-template>

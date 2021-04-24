@@ -9,9 +9,9 @@ import { UserStatusService } from './user-status.service';
 @Injectable({
   providedIn: 'root'
 })
-export class ConnectionListenerService implements OnDestroy {
+export class ConnectionService implements OnDestroy {
 
-  public  isListening: boolean = false;
+  public  isListening: boolean | undefined = undefined;
   private subscriptions: Subscription[] = [];
   private statusTimeoutId;
   @Output() waiterFlag = new EventEmitter<boolean>();
@@ -35,6 +35,7 @@ export class ConnectionListenerService implements OnDestroy {
 
     let sub = this.fbs.getGameConnectionByGameId(this.gameId).valueChanges().pipe(shareReplay(1)).subscribe((data: object[]) => {
       let [connection] = data;
+      if(!connection) return;
       if(!connection[uid]) return this.waiterFlag.emit(false);
       if(Object.keys(connection).length < 3) return this.waiterFlag.emit(true);
 
@@ -49,7 +50,7 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   public stopListening(): void {
-    this.subscriptions[0].unsubscribe();
+    if(!this.subscriptions[0].closed) this.subscriptions[0].unsubscribe();
     this.isListening = false;
   }
 
@@ -67,10 +68,12 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   public connectToGame(uid: string): void {
+    this.startListening(uid);
     this.fbs.updateGameConnectionByGameId({[uid]: true}, this.gameId);
   }
 
   public disconnectFromGame(uid: string): void {
+    this.stopListening();
     this.fbs.updateGameConnectionByGameId({[uid]: false}, this.gameId);
   }
 
@@ -80,6 +83,6 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.forEach(subscription => subscription.closed || subscription.unsubscribe());
   }
 }

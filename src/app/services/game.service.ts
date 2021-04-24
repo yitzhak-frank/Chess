@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, OnInit, Output, EventEmitter } from '@angular/core';
-import { GameInfo, TimeCounters } from '../interfaces/game-interfaces';
+import { Game, GameInfo, TimeCounters } from '../interfaces/game-interfaces';
 import { shareReplay, switchMap, take } from 'rxjs/operators';
 import { FierbaseService } from './firebase.service';
 import { firstPosition } from '../data/toolsPosition';
@@ -20,7 +20,8 @@ export class GameService implements OnInit, OnDestroy {
   public  timeCounters:  TimeCounters = {gameTime: 0, blackTime: 0, whiteTime: 0};
   public  deadTools = { black: [], white: [] };
   private subscriptions: Subscription[] = [];
-  public  player2:       firebase.User
+  public  player2:       firebase.User;
+  private gameStatus:    string;
   @Output() player2Move = new EventEmitter();
 
   constructor(private fbs: FierbaseService, private Auth: AuthService) {
@@ -36,17 +37,22 @@ export class GameService implements OnInit, OnDestroy {
   }
 
   private setPlayer2(): void {
-    this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe((...[game]) => {
-      let player2 = this.Auth.user.uid === game['black_user'] ? 'black_user' : 'white_user';
-      if(game[player2]) this.player2 = JSON.parse(game[player2]);
+    this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe((...[game]: Game[]) => {
+      this.Auth.user$.pipe(take(1)).subscribe(user => {
+        let player2 = user.uid === game['black_user'] ? 'black_user' : 'white_user';
+        if(game[player2]) this.player2 = JSON.parse(game[player2]);
+      })
     })
   }
 
   public setTimeCounters({game_time, black_time, white_time, last_date, color_turn}: GameInfo): void {
     if(!last_date) return;
-    this.timeCounters['gameTime']  = this.calcTimePass(game_time, last_date);
-    this.timeCounters['blackTime'] = color_turn? black_time: this.calcTimePass(black_time, last_date);
-    this.timeCounters['whiteTime'] = color_turn? this.calcTimePass(white_time, last_date): white_time;
+    if(this.gameStatus.endsWith('Won')) this.timeCounters = {gameTime: game_time, blackTime: black_time, whiteTime: white_time};
+    else {
+      this.timeCounters['gameTime']  = this.calcTimePass(game_time, last_date);
+      this.timeCounters['blackTime'] = color_turn? black_time: this.calcTimePass(black_time, last_date);
+      this.timeCounters['whiteTime'] = color_turn? this.calcTimePass(white_time, last_date): white_time;
+    }
   }
 
   public setDeadTools({black_dead_tools, white_dead_tools}: GameInfo): void {
@@ -55,8 +61,9 @@ export class GameService implements OnInit, OnDestroy {
   }
 
   public openGameSocket(gameId: string): void {
-    let subscription = this.fbs.getGameInfoByGameId(gameId).valueChanges().pipe(shareReplay(1)).subscribe(([gameInfo]) => {
+    let subscription = this.fbs.getGameInfoByGameId(gameId).valueChanges().pipe(shareReplay(1)).subscribe(([gameInfo]: GameInfo[]) => {
       if(!gameInfo) return;
+      this.gameStatus = gameInfo.game_status;
       this.player2Move.emit(gameInfo);
     });
     this.subscriptions.push(subscription);
@@ -87,7 +94,7 @@ export class GameService implements OnInit, OnDestroy {
   ngOnInit() {}
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.forEach(subscription => subscription.closed || subscription.unsubscribe());
     clearInterval(this.connector);
   }
 }

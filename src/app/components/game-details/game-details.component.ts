@@ -4,7 +4,7 @@ import { FierbaseService } from 'src/app/services/firebase.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
-import { ConnectionListenerService } from 'src/app/services/connection.service';
+import { ConnectionService } from 'src/app/services/connection.service';
 import { url } from 'src/app/data/general';
 
 @Component({
@@ -23,13 +23,14 @@ export class GameDetailsComponent implements OnInit {
   public  link: string;
   public  copyTooltip: boolean;
   private player2uid: string;
+  public  gameStatus: string;
 
   constructor(
     private fbs: FierbaseService,
     private Route: ActivatedRoute,
     private Router: Router,
     private Auth: AuthService,
-    private Connection: ConnectionListenerService
+    private Connection: ConnectionService
   ) {}
 
   get gameId() {
@@ -93,10 +94,6 @@ export class GameDetailsComponent implements OnInit {
     this.Connection.disconnectFromGame(this.params.uid);
   }
 
-  htmlEntities(str: string): string {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
   ngOnInit(): void {
     this.params = this.Route.snapshot.queryParams;
     if(!this.params.gameId || !this.params.uid) {
@@ -116,10 +113,11 @@ export class GameDetailsComponent implements OnInit {
         let {
           game_time, moves, game_status, start_date, last_date, chess_table ,black_time, white_time, black_dead_tools, white_dead_tools
         } = gameInfo;
+        this.gameStatus = game_status;
         this.setTimeIndex(black_time, white_time);
         this.setGameInfo(game_time, moves, game_status, start_date, last_date, chess_table);
-        this.setPlayerInfo('blackPlayerInfo', blackUser.displayName, blackUser.photoURL, black_time, black_dead_tools)
-        this.setPlayerInfo('whitePlayerInfo', whiteUser.displayName, whiteUser.photoURL, white_time, white_dead_tools)
+        this.setPlayerInfo('blackPlayerInfo', blackUser.displayName, blackUser.photoURL, black_time, black_dead_tools);
+        this.setPlayerInfo('whitePlayerInfo', whiteUser.displayName, whiteUser.photoURL, white_time, white_dead_tools);
       });
     });
     this.Connection.startListening(this.params.uid);

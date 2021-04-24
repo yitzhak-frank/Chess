@@ -1,11 +1,13 @@
+<app-waiter (close)="exitGame('/home')"></app-waiter>
 <app-back-home-btn (leavePage)="leavePage($event)"></app-back-home-btn>
-<app-waiter (close)="exitGame('Home')"></app-waiter>
+<app-gameover *ngIf="!isActive" [gameStatus]="gameStatus" [winnerName]="winnerName"></app-gameover>
+
 <div class="container-fluid">
 
   <div class="game-info mx-auto text-center text-light">
     <div class="d-flex align-items-center justify-content-center mb-3 mt-5 mx-auto">
       <h6 class="text-warning mr-3 ">Time Played:</h6>
-      <app-time-counter [startTime]="ChessTable.gameInfo?.game_time" [color]="ChessTable.colorTurn"></app-time-counter>
+      <app-time-counter [startTime]="timeCounters?.gameTime" [color]="ChessTable.colorTurn" [isActive]="isActive"></app-time-counter>
     </div>
     <h6><span class="text-warning mr-3">Moves:</span> {{ChessTable.gameInfo?.moves}}</h6>
   </div>
@@ -18,6 +20,7 @@
       [color]="false"
       [counter]="timeCounters?.blackTime"
       [deadTools]="deadTools?.black"
+      [isActive]="isActive"
     ></app-player>
 
     <app-chess-table [playerColor]="playerColor"></app-chess-table>
@@ -28,6 +31,7 @@
       [color]="true"
       [counter]="timeCounters?.whiteTime"
       [deadTools]="deadTools?.white"
+      [isActive]="isActive"
     ></app-player>
 
   </div>

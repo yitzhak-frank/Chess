@@ -19,12 +19,12 @@ export class BackHomeBtnComponent implements OnInit {
   constructor(private Router: Router, private Location: Location) {}
 
   goBack(): void {
-    if(location.pathname.includes('chess')) this.leavePage.emit('Back');
+    if(location.pathname.includes('chess')) this.leavePage.emit('..');
     else this.Router.navigate(['..']);
   }
 
   goHome(): void {
-    if(location.pathname.includes('chess')) this.leavePage.emit('Home');
+    if(location.pathname.includes('chess')) this.leavePage.emit('/home');
     else this.Router.navigate(['/home']);
   }
 

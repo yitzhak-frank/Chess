@@ -162,7 +162,7 @@ class KingGuard {
     if(possibleMoves.length) return 'Active game';
     if(this.checkIfOneOfTheToolsCanMove(toolsPosition, toolsClasses, colorTurn, kingPos)) return 'Active game';
     let winner = colorTurn ? 'Black' : 'White';
-    return winner + 'Won';
+    return winner + ' Won';
   }
 
   /**

@@ -2,7 +2,7 @@ import firebase from 'firebase/app';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { GameCreatorService } from 'src/app/services/game-creator.service';
+import { ConnectionService } from 'src/app/services/connection.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -15,20 +15,32 @@ export class SignInComponent implements OnInit, OnDestroy {
   subscripion: Subscription;
   @Output() onLogin = new EventEmitter<firebase.User>();
 
-  constructor(private AuthService: AuthService, private GameCreatorService: GameCreatorService) {
-    this.subscripion = this.AuthService.user$.subscribe(user => {
+  constructor(
+    private Auth: AuthService,
+    private Connection: ConnectionService
+  ) {
+    this.subscripion = this.Auth.user$.subscribe(user => {
       this.user = user;
       this.onLogin.emit(this.user);
     });
   }
 
+  get gameId(): string {
+    return localStorage['chess-game-id'];
+  }
+
+  removeGameId(): void {
+    delete localStorage['chess-game-id'];
+  }
+
   login(): void {
-    this.AuthService.googleLogin();
+    this.Auth.googleLogin();
   }
 
   logout(): void {
-    this.AuthService.logOut();
-    this.GameCreatorService.removeGameId();
+    if(this.gameId) this.Connection.disconnectFromGame(this.user.uid);
+    this.removeGameId();
+    this.Auth.logOut();
   }
 
   ngOnInit(): void {}

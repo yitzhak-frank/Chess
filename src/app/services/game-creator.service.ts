@@ -1,4 +1,4 @@
-import { ConnectionListenerService } from './connection.service';
+import { ConnectionService } from './connection.service';
 import { FierbaseService } from './firebase.service';
 import { firstPosition } from '../data/toolsPosition';
 import { AuthService } from './auth.service';
@@ -21,7 +21,7 @@ export class GameCreatorService {
     private fbs:        FierbaseService,
     private Auth:       AuthService,
     private Router:     Router,
-    private Connection: ConnectionListenerService
+    private Connection: ConnectionService
   ) {}
 
   // get server time
@@ -60,11 +60,9 @@ export class GameCreatorService {
    */
   public createGame(uid: string, callback?: () => void): void {
     this.fbs.gatUserGames('white_uid',uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
-      console.log(games)
       if(!games.length) this.addGame(uid, callback);
       else {
         let emptyGame = games[games.findIndex(game => !game['black_uid'])];
-        console.log(emptyGame)
         if(emptyGame) {
           this.setGameId(emptyGame.id);
           if(callback) callback();
@@ -75,7 +73,7 @@ export class GameCreatorService {
   }
 
   /**
-   * Adds tew game to db.
+   * Adds teh new game to db.
    * @param uid String with the user id.
    * @param callback Function contains actions to do after getting the game id.
    */
@@ -92,10 +90,10 @@ export class GameCreatorService {
 
   // when user connect with game url add him directly to the game
   private addPlayerToGame(uid: string): void {
-    this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(game => {
+    this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(async game => {
       if(!game.black_uid) {
-        this.fbs.updateGame({ black_uid: uid,black_user: JSON.stringify(this.Auth.user) }, this.gameId);
-        this.fbs.updateGameInfoByGameId({start_date: this.timestamp}, this.gameId);
+        await this.fbs.updateGame({ black_uid: uid,black_user: JSON.stringify(this.Auth.user) }, this.gameId);
+        this.fbs.updateGameInfoByGameId({start_date: this.timestamp, last_date: this.timestamp}, this.gameId);
       }
       this.Connection.startListening(uid);
       this.Connection.connectToGame(uid);

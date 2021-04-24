@@ -21,6 +21,7 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { BackHomeBtnComponent } from './components/back-home-btn/back-home-btn.component';
 import { CopyLinkComponent } from './components/copy-link/copy-link.component';
+import { GameoverComponent } from './components/gameover/gameover.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { CopyLinkComponent } from './components/copy-link/copy-link.component';
     TimeCounterComponent,
     GameDetailsComponent,
     BackHomeBtnComponent,
-    CopyLinkComponent
+    CopyLinkComponent,
+    GameoverComponent
   ],
   imports: [
     BrowserModule,

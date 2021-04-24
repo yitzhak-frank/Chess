@@ -56,8 +56,8 @@ export class ChessTableService implements OnInit, OnDestroy {
       isChess['position'] = KingGuard.checkIfChess(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
       isChess['color']    = this.colorTurn;
 
-      KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
-      this.gameInfo = gameInfo;
+      this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
+      this.gameInfo   = gameInfo;
 
       this.GameService.setTimeCounters(gameInfo);
       this.GameService.setDeadTools(gameInfo);
@@ -148,7 +148,7 @@ export class ChessTableService implements OnInit, OnDestroy {
    */
   public updateGameInfo(colorTurn: boolean = this.colorTurn): void {
     let {threatsMap, gameInfo, deadTool, toolsClasses, toolsPosition} = this;
-    this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
+    this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, colorTurn, toolsPosition);
     this.GameService.updateGameInfo(colorTurn, threatsMap, gameInfo, deadTool, this.gameStatus);
   }
 
@@ -239,6 +239,6 @@ export class ChessTableService implements OnInit, OnDestroy {
   ngOnInit(): void {}
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.forEach(subscription => subscription.closed || subscription.unsubscribe());
   }
 }
