@@ -71,7 +71,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if(this.Auth.user?.uid) this.Connection.startListening(this.Auth.user.uid);
+    if(this.Auth.user?.uid && this.GameCreator.gameId) this.Connection.startListening(this.Auth.user.uid);
     this.subscription.push(
       this.Route.queryParams.subscribe(params => {
         if(!params.gameId) this.GameCreator.setPlayerColor(true);
@@ -96,6 +96,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnChanges() {}
 
   ngOnDestroy(): void {
-    this.subscription.forEach(subscription => subscription.unsubscribe())
+    this.subscription.forEach(subscription => subscription.closed || subscription.unsubscribe());
   }
 }

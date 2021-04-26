@@ -58,6 +58,10 @@ export class ChessGameComponent implements OnInit, OnDestroy, LeavePageGuard {
     localStorage['chess-game-id'] = gameId;
   }
 
+  removeGameId(): void {
+    delete localStorage['chess-game-id'];
+  }
+
   setWinnerName(): string {
     if(!this.gameStatus.endsWith('Won')) return '';
     if(this.colorTorn === this.playerColor[0]) {
@@ -83,6 +87,7 @@ export class ChessGameComponent implements OnInit, OnDestroy, LeavePageGuard {
   exitGame(path: string): void {
     if(this.gameId) this.Connection.disconnectFromGame(this.uid);
     this.doLeavePage = true;
+    this.removeGameId();
     this.Router.navigate([path]);
   }
 

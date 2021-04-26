@@ -22,7 +22,7 @@ export class ConnectionService implements OnDestroy {
     private Router: Router,
     private UserStatus: UserStatusService
   ) {
-    this.subscriptions.push(Auth.user$.subscribe(user => user ? this.startListening(user.uid) : null));
+    this.subscriptions.push(Auth.user$.subscribe(user => user && this.gameId ? this.startListening(user.uid) : null));
   }
 
   get gameId() {

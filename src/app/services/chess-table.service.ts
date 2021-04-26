@@ -29,7 +29,7 @@ export class ChessTableService implements OnInit, OnDestroy {
   private deadTool:         ToolInfo;
   public  gameStatus:       string;
   public  castlingInfo = { right: '', left: '' };
-  public  isChess = { position: '', color: false };
+  public  isChess = { position: '', color: undefined };
 
   constructor(private GameService: GameService) {
     this.getGameData();
