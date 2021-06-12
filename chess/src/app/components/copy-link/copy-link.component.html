@@ -1,7 +1,7 @@
 <button *ngIf="!link; else gameLink" (click)="setLink()">Get Game Link</button>
 
 <ng-template #gameLink>
-  <input type="text" #input [value]="link">
+  <input readonly type="text" #input [value]="link">
   <strong (click)="copyLink(input)">Copy</strong>
 </ng-template>
 

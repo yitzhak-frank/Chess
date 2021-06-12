@@ -1,11 +1,11 @@
-import { Game, GameInfo, PlayerInfo } from '../../interfaces/game-interfaces';
-import { Component, OnInit } from '@angular/core';
-import { FierbaseService } from 'src/app/services/firebase.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { url } from 'src/app/data/general';
 import { take } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth.service';
-import { ConnectionListenerService } from 'src/app/services/connection.service';
-import { url } from 'src/app/data/general';
+import { FierbaseService } from 'src/app/services/firebase.service';
+import { Component, OnInit } from '@angular/core';
+import { ConnectionService } from 'src/app/services/connection.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Game, GameInfo, PlayerInfo } from '../../interfaces/game-interfaces';
 
 @Component({
   selector: 'app-game-details',
@@ -23,13 +23,14 @@ export class GameDetailsComponent implements OnInit {
   public  link: string;
   public  copyTooltip: boolean;
   private player2uid: string;
+  public  gameStatus: string;
 
   constructor(
     private fbs: FierbaseService,
     private Route: ActivatedRoute,
     private Router: Router,
     private Auth: AuthService,
-    private Connection: ConnectionListenerService
+    private Connection: ConnectionService
   ) {}
 
   get gameId() {
@@ -75,7 +76,7 @@ export class GameDetailsComponent implements OnInit {
 
   createGameLink(): void {
     this.setGameId(this.params.gameId);
-    this.link = `${url}/chess?gmaeId=${this.gameId}&uid=${this.player2uid}`
+    this.link = `${url}/chess?gameId=${this.gameId}&uid=${this.player2uid}`
   }
 
   deleteGameLink(): void {
@@ -84,6 +85,7 @@ export class GameDetailsComponent implements OnInit {
 
   connectToGame(): void {
     this.createGameLink();
+    this.Connection.startListening(this.params.uid);
     this.Connection.connectToGame(this.params.uid);
   }
 
@@ -97,11 +99,8 @@ export class GameDetailsComponent implements OnInit {
     if(!this.params.gameId || !this.params.uid) {
       this.Router.navigate(['/home']);
       return;
-    } else this.Auth.user$.pipe(take(1)).subscribe(user => {
-      if(user.uid !== this.params.uid) this.Router.navigate(['/home']);
-    })
-    this.fbs.getGameById(this.params.gameId).pipe(take(1)).toPromise().then(game => this.game = game)
-    .then(() => {
+    }
+    this.fbs.getGameById(this.params.gameId).pipe(take(1)).toPromise().then(game => this.game = game).then(() => {
       if(this.game['black_uid'] !== this.params.uid && this.game['white_uid'] !== this.params.uid)
         return this.Router.navigate(['/home']);
 
@@ -114,12 +113,14 @@ export class GameDetailsComponent implements OnInit {
         let {
           game_time, moves, game_status, start_date, last_date, chess_table ,black_time, white_time, black_dead_tools, white_dead_tools
         } = gameInfo;
+        this.gameStatus = game_status;
         this.setTimeIndex(black_time, white_time);
         this.setGameInfo(game_time, moves, game_status, start_date, last_date, chess_table);
-        this.setPlayerInfo('blackPlayerInfo', blackUser.displayName, blackUser.photoURL, black_time, black_dead_tools)
-        this.setPlayerInfo('whitePlayerInfo', whiteUser.displayName, whiteUser.photoURL, white_time, white_dead_tools)
+        this.setPlayerInfo('blackPlayerInfo', blackUser.displayName, blackUser.photoURL, black_time, black_dead_tools);
+        this.setPlayerInfo('whitePlayerInfo', whiteUser.displayName, whiteUser.photoURL, white_time, white_dead_tools);
       });
-    })
+    });
+    this.Connection.startListening(this.params.uid);
   }
 
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { ConnectionListenerService } from '../../services/connection.service';
+import { ConnectionService } from '../../services/connection.service';
 import { GameService } from 'src/app/services/game.service';
 
 @Component({
@@ -9,28 +9,28 @@ import { GameService } from 'src/app/services/game.service';
 })
 export class WaiterComponent implements OnInit {
 
-  public flag:    boolean;
+  public flag: boolean;
   public content = { btn: '', text: '' };
   @Output() close = new EventEmitter();
 
   constructor(
-    private Connection: ConnectionListenerService,
+    private Connection: ConnectionService,
     private Game: GameService
   ) {}
 
   setContent(): void {
     if(location.pathname.includes('chess')) {
-      this.content = {btn: 'Exit Game', text: `${this.Game.player2.displayName} left the game`};
+      this.content = {btn: 'Exit Game', text: `${this.Game.player2?.displayName} left the game`};
     } else this.content = {btn: 'Cancel', text: 'Waiting for player to join the game'};
   }
 
   showWaiter(): void {
-    setTimeout(() => document.getElementById('waiter').style.transform = 'translate(0)', 1);
+    setTimeout(() => document.getElementById('waiter').style.transform = 'translate(0)', 1000);
   }
 
   hideWaiter(): void {
     this.Connection.stopListening();
-    setTimeout(() => document.getElementById('waiter').style.transform = 'translate(0, -200px)', 1);
+    setTimeout(() => document.getElementById('waiter').style.transform = 'translate(0, -200px)', 1000);
     this.close.emit();
     this.removeGameId();
   }

@@ -17,7 +17,7 @@ export class ChessTableService implements OnInit, OnDestroy {
   private chessMatrix:      Array<Array<string>> = chessMatrix;
   private toolsPosition:    object   = firstPosition;
   private toolsClasses:     object   = {};
-  private playerColor:      boolean[];
+  public  playerColor:      boolean[];
   public  colorTurn:        boolean  = true;
   private selectedTool:     ToolInfo;
   public  possibleMoves:    string[] = [];
@@ -29,7 +29,7 @@ export class ChessTableService implements OnInit, OnDestroy {
   private deadTool:         ToolInfo;
   public  gameStatus:       string;
   public  castlingInfo = { right: '', left: '' };
-  public  isChess = { position: '', color: false };
+  public  isChess = { position: '', color: undefined };
 
   constructor(private GameService: GameService) {
     this.getGameData();
@@ -56,8 +56,8 @@ export class ChessTableService implements OnInit, OnDestroy {
       isChess['position'] = KingGuard.checkIfChess(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
       isChess['color']    = this.colorTurn;
 
-      KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
-      this.gameInfo = gameInfo;
+      this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
+      this.gameInfo   = gameInfo;
 
       this.GameService.setTimeCounters(gameInfo);
       this.GameService.setDeadTools(gameInfo);
@@ -104,8 +104,8 @@ export class ChessTableService implements OnInit, OnDestroy {
     possibleMoves.splice(0, possibleMoves.length);
     possibleMoves.push(...toolsClasses[toolInfo.position].getPossibleMoves());
 
-    if(selectedTool) toolsPosition[selectedTool.position].selected  = false;
-    if(possibleMoves.length) toolsPosition[toolInfo.position].selected   = true;
+    if(selectedTool) toolsPosition[selectedTool.position].selected     = false;
+    if(possibleMoves.length) toolsPosition[toolInfo.position].selected = true;
 
     this.selectedTool = toolInfo;
 
@@ -148,7 +148,7 @@ export class ChessTableService implements OnInit, OnDestroy {
    */
   public updateGameInfo(colorTurn: boolean = this.colorTurn): void {
     let {threatsMap, gameInfo, deadTool, toolsClasses, toolsPosition} = this;
-    this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, this.colorTurn, toolsPosition);
+    this.gameStatus = KingGuard.checkGameState(threatsMap, toolsClasses, colorTurn, toolsPosition);
     this.GameService.updateGameInfo(colorTurn, threatsMap, gameInfo, deadTool, this.gameStatus);
   }
 
@@ -198,10 +198,47 @@ export class ChessTableService implements OnInit, OnDestroy {
 
   public getCoronationInfo(): object { return this.coronationInfo }
 
+  public dragAndDrop({target: {parentNode :element}}, color: boolean) {
+
+    if(color !== this.playerColor[0] || color !== this.colorTurn) return;
+
+    const startDragElement = (e) => {
+      e.preventDefault();
+      document.onmouseup = stopDragElement;
+      document.onmousemove = dragElement;
+    }
+
+    const dragElement = (e) => {
+      e.preventDefault();
+      element.style.position = 'fixed';
+      element.style.top  = (e.y - (element.clientHeight/2)) + "px";
+      element.style.left = (e.x - (element.clientWidth/2))  + "px";
+      element.style.textShadow = '2px 2px 16px #444'
+    }
+
+    const stopDragElement = (e) => {
+      element.style = {...element.style, position: '', top: '', left: ''};
+      document.onmouseup = null;
+      document.onmousemove = null;
+      dropElement(e);
+    }
+
+    const dropElement = ({x, y}) => {
+      const target  = document.elementFromPoint(x, y);
+      const myEvent = new MouseEvent('drop');
+      const click   = function() {this.click()};
+
+      target.addEventListener('drop', click);
+      target.dispatchEvent(myEvent);
+      target.removeEventListener('drop', click);
+    }
+
+    element.onmousedown = startDragElement;
+  }
 
   ngOnInit(): void {}
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.forEach(subscription => subscription.closed || subscription.unsubscribe());
   }
 }

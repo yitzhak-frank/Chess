@@ -6,13 +6,12 @@
 ></app-coronation>
 
 <div id="chess-table" >
-  <table [ngClass]="{white: playerColor[0]}">
+  <table>
     <tr *ngFor="let row of rows">
       <td *ngFor="let col of cols">
         <div [ngClass]="{canGo: possibleMoves.includes(col + row)}">
           <app-tool
             *ngIf="toolsPosition[col + row]; else emptyCell"
-            [playerColor]="playerColor[0]"
             [toolInfo]="toolsPosition[col + row]? toolsPosition[col + row]: {}"
             (cellClicked)="toolClicked($event)"
             [ngClass]="{

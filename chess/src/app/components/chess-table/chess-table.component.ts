@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, DoCheck, Input, OnInit } from '@angular/core';
 import { cols, rows } from 'src/app/data/tableArrays';
 import { firstPosition } from 'src/app/data/toolsPosition';
 import { ToolInfo } from 'src/app/interfaces/tool-interface';
@@ -9,16 +9,17 @@ import { ChessTableService } from 'src/app/services/chess-table.service';
   templateUrl: './chess-table.component.html',
   styleUrls: ['./chess-table.component.scss']
 })
-export class ChessTableComponent implements OnInit {
+export class ChessTableComponent implements OnInit, DoCheck {
 
-  public rows:           number[] = rows;
-  public cols:           string[] = cols;
-  public toolsPosition:  object   = firstPosition;
-  public possibleMoves:  string[] = [];
-  public isChess:        object;
-  public colorTurn:      boolean;
-  public coronationInfo: any;
-  @Input() playerColor:  boolean[];
+  @Input() playerColor:  boolean[] = [];
+  public  rows:           number[]  = rows;
+  public  cols:           string[]  = cols;
+  public  possibleMoves:  string[]  = [];
+  public  toolsPosition:  object    = firstPosition;
+  public  isChess:        object;
+  public  colorTurn:      boolean;
+  public  coronationInfo: any;
+  private sound;
 
   constructor(private tableService: ChessTableService) {
     this.possibleMoves  = tableService.possibleMoves;
@@ -42,6 +43,17 @@ export class ChessTableComponent implements OnInit {
   }
 
   public coronation(e): void { this.coronationInfo = e }
+
+  private playChessSound(): void {
+    if(this.sound) return;
+    this.sound = new Audio('../../../assets/sounds/Run_Sound_Effect.mp3');
+    this.sound.play();
+  }
+
+  ngDoCheck(): void {
+    if(!this.isChess['position'] || this.isChess['color'] !== this.playerColor[0]) return;
+    this.playChessSound();
+  }
 
   ngOnInit(): void { this.tableService.onTableLoad(this.playerColor) }
 

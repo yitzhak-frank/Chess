@@ -1,11 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss']
 })
-export class PlayerComponent implements OnInit {
+export class PlayerComponent implements OnInit, OnChanges {
 
   @Input() name:       string;
   @Input() image:      string;
@@ -13,6 +13,7 @@ export class PlayerComponent implements OnInit {
   @Input() counter:    number;
   @Input() time:       string;
   @Input() deadTools:  string[];
+  @Input() isActive:   boolean;
   public   killsScore: number;
 
   constructor() {}
@@ -25,8 +26,10 @@ export class PlayerComponent implements OnInit {
     return score;
   }
 
-  ngOnInit(): void {
-    if(this.deadTools) this.killsScore = this.calcScore(this.deadTools);
+  ngOnChanges(): void {
+    if(this.deadTools?.length) this.killsScore = this.calcScore(this.deadTools);
   }
+
+  ngOnInit(): void {}
 
 }

@@ -1,10 +1,10 @@
+import 'firebase/firestore';
+import { of } from 'rxjs';
+import * as firebase from 'firebase/app';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { tap, map, switchMap, first, shareReplay, take } from 'rxjs/operators';
-import * as firebase from 'firebase/app';
-import 'firebase/firestore';
-import { of } from 'rxjs';
+import { tap, map, switchMap, first, shareReplay } from 'rxjs/operators';
 
 
 @Injectable({

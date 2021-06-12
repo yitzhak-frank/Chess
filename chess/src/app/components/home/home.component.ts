@@ -1,5 +1,5 @@
-import { Component, OnChanges, OnDestroy, OnInit } from '@angular/core';
-import { ConnectionListenerService } from 'src/app/services/connection.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ConnectionService } from 'src/app/services/connection.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameCreatorService } from 'src/app/services/game-creator.service';
 import { Subscription } from 'rxjs';
@@ -12,7 +12,7 @@ import firebase from 'firebase/app';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit, OnChanges, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy {
 
   userName: string  = '';
   link:     string  = '';
@@ -27,7 +27,7 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
     private Router: Router,
     private Auth: AuthService,
     private GameCreator: GameCreatorService,
-    private Connection: ConnectionListenerService
+    private Connection: ConnectionService
   ) {}
 
   showLogin() {
@@ -71,6 +71,7 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
+    if(this.Auth.user?.uid && this.GameCreator.gameId) this.Connection.startListening(this.Auth.user.uid);
     this.subscription.push(
       this.Route.queryParams.subscribe(params => {
         if(!params.gameId) this.GameCreator.setPlayerColor(true);
@@ -84,7 +85,10 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
         this.user = user;
         this.userName = user?.displayName;
         if(!this.params) this.GameCreator.setPlayerColor(true);
-        if(user) this.GameCreator.joinToGame();
+        if(user && this.params && this.Connection.isListening !== false) {
+          this.GameCreator.joinToGame(user.uid);
+          this.Connection.startListening(user.uid);
+        }
       })
     );
   }
@@ -92,6 +96,6 @@ export class HomeComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges() {}
 
   ngOnDestroy(): void {
-    this.subscription.forEach(subscription => subscription.unsubscribe())
+    this.subscription.forEach(subscription => subscription.closed || subscription.unsubscribe());
   }
 }

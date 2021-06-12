@@ -1,17 +1,17 @@
-import { Injectable, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import { Subscription } from 'rxjs';
 import { FierbaseService } from './firebase.service';
 import { UserStatusService } from './user-status.service';
+import { Injectable, OnDestroy, Output, EventEmitter } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ConnectionListenerService implements OnDestroy {
+export class ConnectionService implements OnDestroy {
 
-  public  isListening: boolean = false;
+  public  isListening: boolean | undefined = undefined;
   private subscriptions: Subscription[] = [];
   private statusTimeoutId;
   @Output() waiterFlag = new EventEmitter<boolean>();
@@ -22,7 +22,7 @@ export class ConnectionListenerService implements OnDestroy {
     private Router: Router,
     private UserStatus: UserStatusService
   ) {
-    this.subscriptions.push(Auth.user$.subscribe(user => user ? this.startListening(user.uid) : null));
+    this.subscriptions.push(Auth.user$.subscribe(user => user && this.gameId ? this.startListening(user.uid) : null));
   }
 
   get gameId() {
@@ -30,10 +30,12 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   public startListening(uid: string): void {
-    if(!this.gameId || this.isListening) return;
+    if(!this.gameId) return;
+    if(this.isListening) this.subscriptions[0].unsubscribe();
 
     let sub = this.fbs.getGameConnectionByGameId(this.gameId).valueChanges().pipe(shareReplay(1)).subscribe((data: object[]) => {
       let [connection] = data;
+      if(!connection) return;
       if(!connection[uid]) return this.waiterFlag.emit(false);
       if(Object.keys(connection).length < 3) return this.waiterFlag.emit(true);
 
@@ -48,16 +50,17 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   public stopListening(): void {
-    this.subscriptions[0].unsubscribe();
+    if(!this.subscriptions[0].closed) this.subscriptions[0].unsubscribe();
     this.isListening = false;
   }
 
   public listenToUserStatus(uid: string): void {
     let subscription = this.UserStatus.listenToUserStatus(uid).subscribe(({status}) => {
       if(status === 'offline') {
-        this.statusTimeoutId = setTimeout(() => this.disconnectFromGame(uid), 1000 * 65);
+        if(!this.statusTimeoutId) this.statusTimeoutId = setTimeout(() => this.disconnectFromGame(uid), 1000 * 65);
       } else if(this.statusTimeoutId) {
         clearTimeout(this.statusTimeoutId);
+        this.statusTimeoutId = null
         this.connectToGame(uid);
       }
     });
@@ -65,10 +68,12 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   public connectToGame(uid: string): void {
+    this.startListening(uid);
     this.fbs.updateGameConnectionByGameId({[uid]: true}, this.gameId);
   }
 
   public disconnectFromGame(uid: string): void {
+    this.stopListening();
     this.fbs.updateGameConnectionByGameId({[uid]: false}, this.gameId);
   }
 
@@ -78,6 +83,6 @@ export class ConnectionListenerService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.forEach(subscription => subscription.closed || subscription.unsubscribe());
   }
 }

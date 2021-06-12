@@ -1,29 +1,27 @@
-import { ConnectionListenerService } from './connection.service';
-import { Injectable, OnDestroy } from '@angular/core';
-import { FierbaseService } from './firebase.service';
-import { firstPosition } from '../data/toolsPosition';
-import { Subscription } from 'rxjs';
-import { AuthService } from './auth.service';
-import { GameInfo } from '../interfaces/game-interfaces';
-import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
-import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import { take } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { GameInfo } from '../interfaces/game-interfaces';
+import * as firebase from 'firebase/app';
+import { Injectable } from '@angular/core';
+import { AuthService } from './auth.service';
+import { firstPosition } from '../data/toolsPosition';
+import { FierbaseService } from './firebase.service';
+import { ConnectionService } from './connection.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class GameCreatorService implements OnDestroy {
+export class GameCreatorService {
 
   public  playerColor:   boolean;
   private toolsPsition = firstPosition;
-  private subscriptions: Subscription[] = [];
 
   constructor(
     private fbs:        FierbaseService,
     private Auth:       AuthService,
     private Router:     Router,
-    private Connection: ConnectionListenerService
+    private Connection: ConnectionService
   ) {}
 
   // get server time
@@ -50,52 +48,56 @@ export class GameCreatorService implements OnDestroy {
     this.playerColor = playerColor;
   }
 
-  public joinToGame(): void {
-    let uid = this.Auth.user.uid;
+  public joinToGame(uid: string): void {
     if(this.playerColor && !this.gameId) this.createGame(uid);
     else if(!this.playerColor) this.addPlayerToGame(uid);
   }
 
-  //
   /**
    * Sets new game for the user to play.
    * @param uid String with the user id.
    * @param callback Function contains actions to do after getting the game id.
    */
   public createGame(uid: string, callback?: () => void): void {
-    let subscription = this.fbs.gatUserGames('white_uid',uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
-      if(!games.length) this.addGame(uid);
+    this.fbs.gatUserGames('white_uid',uid).valueChanges({idField: 'id'}).pipe(take(1)).subscribe(games => {
+      if(!games.length) this.addGame(uid, callback);
       else {
         let emptyGame = games[games.findIndex(game => !game['black_uid'])];
-        if(emptyGame) this.setGameId(emptyGame.id);
-        else if(!this.gameId) this.addGame(uid);
+        if(emptyGame) {
+          this.setGameId(emptyGame.id);
+          if(callback) callback();
+        } else this.addGame(uid, callback);
       }
       this.Connection.startListening(uid);
-      if(callback) callback();
     });
-    this.subscriptions.push(subscription);
   }
 
-  // add game in db
-  private addGame(uid: string): void {
-    this.fbs.addGame({ white_uid: uid, white_user: JSON.stringify(this.Auth.user)}).then(docRef => {
+  /**
+   * Adds teh new game to db.
+   * @param uid String with the user id.
+   * @param callback Function contains actions to do after getting the game id.
+   */
+  private addGame(uid: string, callback?: () => void): void {
+    this.fbs.addGame(
+      { white_uid: uid, black_uid: '', white_user: JSON.stringify(this.Auth.user), black_user: ''}
+    ).then(docRef => {
       this.setGameId(docRef.id);
       this.fbs.addGameConnection({[uid]: false, game_id: this.gameId});
       this.createGameInfo();
+      if(callback) callback();
     });
   }
 
   // when user connect with game url add him directly to the game
   private addPlayerToGame(uid: string): void {
-    let subscription = this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(game => {
-      if(!game.black_uid) {
-        this.fbs.updateGame({ black_uid: uid,black_user: JSON.stringify(this.Auth.user) }, this.gameId);
-        this.fbs.updateGameInfoByGameId({start_date: this.timestamp}, this.gameId);
-      }
+    this.fbs.getGameById(this.gameId).pipe(take(1)).subscribe(async game => {
+      if(!game.black_uid && game.white_uid !== uid) {
+        await this.fbs.updateGame({ black_uid: uid,black_user: JSON.stringify(this.Auth.user) }, this.gameId);
+        this.fbs.updateGameInfoByGameId({start_date: this.timestamp, last_date: this.timestamp}, this.gameId);
+      } else if(game.white_uid === uid) return this.Router.navigate(['/home'])
       this.Connection.startListening(uid);
       this.Connection.connectToGame(uid);
     });
-    this.subscriptions.push(subscription);
   }
 
   private createGameInfo(): void {
@@ -116,10 +118,6 @@ export class GameCreatorService implements OnDestroy {
       chess_table: ''
     }
     this.fbs.addGameInfo(gameInfo);
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
 }

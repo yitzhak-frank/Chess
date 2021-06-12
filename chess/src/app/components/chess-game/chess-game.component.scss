@@ -10,6 +10,8 @@
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
+  padding-bottom: 30px;
+  overflow-y: auto;
 
   .table-and-players{
     display: flex;
@@ -17,7 +19,7 @@
     margin-top: 25px;
     margin-bottom: 25px;
 
-    @include media-query(lg) {
+    @include media-query(md) {
       display: block;
     }
   }

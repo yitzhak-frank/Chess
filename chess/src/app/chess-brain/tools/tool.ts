@@ -4,13 +4,13 @@ import { ToolInfo } from '../../interfaces/tool-interface';
 
 class Tool {
 
-  public color: boolean;
-  public position: string;
-  public isVirgin: boolean;
-  public index: number[];
-  public chessMatrix: Array<Array<string>> = chessMatrix;
+  public color:         boolean;
+  public position:      string;
+  public isVirgin:      boolean;
+  public index:         number[];
+  public chessMatrix:   Array<Array<string>> = chessMatrix;
   public toolsPosition: object = firstPosition;
-  public threatsMap: string[] = [];
+  public threatsMap:    string[] = [];
   public possibleMoves: string[] = [];
 
   constructor({ color, position, isVirgin }: ToolInfo){

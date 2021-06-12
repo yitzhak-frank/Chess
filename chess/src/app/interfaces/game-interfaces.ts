@@ -1,9 +1,8 @@
 export interface Game {
-  info?:       boolean;
   id?:         string;
-  black_uid?:  string;
+  black_uid:  string;
   white_uid:   string;
-  black_user?: string;
+  black_user: string;
   white_user:  string;
 }
 

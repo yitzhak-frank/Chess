@@ -37,7 +37,12 @@
         left: 10px;
         color: white;
 
+        @include media-query(sm) {
+          left: -5px;
+        }
+
         .heading-1 {
+          position: relative;
           margin-top: 0;
           font-size: 3rem;
           padding-left: 20px;
@@ -45,6 +50,25 @@
 
           @include media-query(sm) {
             font-size: 2.5rem;
+          }
+
+          #logo {
+            position: absolute;
+            top: -15px;
+            height: 125px;
+            transform: rotate(20deg);
+            transition: 0.33s;
+
+            &:hover {
+              transform: scale(1.1);
+              cursor: pointer;
+            }
+
+            @include media-query(sm) {
+              top: -10px;
+              right: -55px;
+              height: 100px;
+            }
           }
         }
 

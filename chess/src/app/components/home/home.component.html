@@ -3,7 +3,9 @@
   <div class="home-body-cover">
     <div class="top">
       <span class="heading">
-        <h1 class="heading-1">Welcome To Chess</h1>
+        <h1 class="heading-1">Welcome To Chess
+          <a [routerLink]="['/home']"><img src="../../../assets/images/logo.png" alt="logo" id="logo"></a>
+        </h1>
         <h4 class="heading-2">Click anywhere to start</h4>
       </span>
       <span class="sign-in" id="sign-in" *ngIf="showLoginIndex">

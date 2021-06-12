@@ -1,1 +1,1 @@
-export const url = 'http://localhost:4200';
+export const url = 'https://chessmate-22c5c.web.app';
